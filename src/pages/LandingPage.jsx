@@ -1,5 +1,5 @@
 import { useState } from "react"
-import SignIn from "../components/SignIn"
+import SignIn from '../components/Signin'
 import SignUp from "../components/SignUp"
 
 
