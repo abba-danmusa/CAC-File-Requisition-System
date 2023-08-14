@@ -1,5 +1,5 @@
 import { createTheme, ThemeProvider, useTheme } from '@mui/material/styles'; import { outlinedInputClasses } from '@mui/material/OutlinedInput';
-import { primaryColor, greyColor } from '../utils/colors';
+import { primaryColor, darkColor } from '../utils/colors';
 
 const customTheme = (outerTheme) =>
   createTheme({
@@ -10,7 +10,7 @@ const customTheme = (outerTheme) =>
       MuiTextField: {
         styleOverrides: {
           root: {
-            '--TextField-brandBorderColor': greyColor,
+            '--TextField-brandBorderColor': darkColor,
             '--TextField-brandBorderHoverColor': primaryColor,
             '--TextField-brandBorderFocusedColor': primaryColor,
             '& label.Mui-focused': {

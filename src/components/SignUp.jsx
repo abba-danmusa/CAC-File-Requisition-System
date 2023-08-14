@@ -7,7 +7,7 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
-import {greyColor, primaryColor, secondaryColor} from '../utils/colors';
+import {darkColor, primaryColor, secondaryColor} from '../utils/colors';
 import Container from '@mui/material/Container';
 import Copyright from './CopyRight';
 import Theme from './Theme';
@@ -198,7 +198,7 @@ export default function SignUp({ activeTab }) {
                     labelId='Rank-label'
                     value={rank}
                     name='rank'
-                    sx={{textAlign: 'left', borderColor: greyColor, ':hover': {borderColor: primaryColor}}}
+                    sx={{textAlign: 'left', borderColor: darkColor, ':hover': {borderColor: primaryColor}}}
                     onChange={handleOnChange}
                   >
                     {
@@ -225,7 +225,7 @@ export default function SignUp({ activeTab }) {
                     labelId='department-label'
                     value={department}
                     name='department'
-                    sx={{textAlign: 'left', borderColor: greyColor, ':hover': {borderColor: primaryColor}}}
+                    sx={{textAlign: 'left', borderColor: darkColor, ':hover': {borderColor: primaryColor}}}
                     onChange={handleOnChange}
                   >
                     {

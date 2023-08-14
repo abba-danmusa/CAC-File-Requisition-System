@@ -6,8 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + React</title>
   </head>
-  <body style="background-image: url(./src/assets/images/backimage.png); background-size: cover; background-position: center; background-repeat: no-repeat;">
-    <div id="root"></div>
+  <body>
+    <div style="background-image: url(./src/assets/images/backimage.png); background-size: cover; background-position: center; background-repeat: no-repeat; position: fixed; margin: auto; width: 100%; height: 100%; ">
+      <div id="root" style="position: absolute; top: 0; min-width: 100%; margin: 0; padding: 0; ">
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

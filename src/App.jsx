@@ -15,7 +15,6 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <img src='./src/assets/images/logos.png' className='logo'></img>
       <BrowserRouter>
         <Routes>
           <Route
