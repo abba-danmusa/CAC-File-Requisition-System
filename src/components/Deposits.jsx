@@ -7,6 +7,8 @@ import { Button } from '@mui/material';
 import RequestForm from './RequestForm';
 import Backdrop from '@mui/material/Backdrop';
 import Close from '@mui/icons-material/Close';
+import Slide from '@mui/material/Slide'
+import moment from 'moment';
 
 export default function Request() {
   
@@ -26,6 +28,8 @@ export default function Request() {
       <Typography color="text.secondary" sx={{ flex: 1 }}>
         Click on the + button below to request for a file
       </Typography>
+      {/* TODO make the clock tick */}
+      <p>{moment().format('MMMM Do YYYY, h:mm:ss a')}</p>
       <Button
         sx={{
           width: 'fit-content', alignSelf: 'center', backgroundColor: primaryColor, ":hover": {backgroundColor: secondaryColor}
@@ -36,27 +40,30 @@ export default function Request() {
           sx={{ fontSize: 25, color: contrastText }}
         />
       </Button>
-      <Backdrop
-        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 2 }}
-        open={open}
-        // onClick={handleClose}
-      >
-        <Button
-          onClick={handleClose}
-          sx={{
-            position: 'fixed',
-            top: '20%',
-            right: '30%',
-            color: contrastText,
-            width: 'fit-content',
-            backgroundColor: 'brown',
-            ':hover': { backgroundColor: 'red' }
-          }}
+
+      <Slide direction="left" in={open} mountOnEnter unmountOnExit>
+        <Backdrop
+          sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open={open}
+          // onClick={handleClose}
         >
-          <Close fontSize='medium'/>
-        </Button>
-        <RequestForm/>
-      </Backdrop>
+          <Button
+            onClick={handleClose}
+            sx={{
+              position: 'fixed',
+              top: '20%',
+              right: '30%',
+              color: contrastText,
+              width: 'fit-content',
+              backgroundColor: 'brown',
+              ':hover': { backgroundColor: 'red' }
+            }}
+          >
+            <Close fontSize='medium'/>
+          </Button>
+          <RequestForm/>
+        </Backdrop>
+      </Slide>
     </>
   );
 }

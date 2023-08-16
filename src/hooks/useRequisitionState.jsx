@@ -2,17 +2,18 @@ import { create } from 'zustand';
 
 const initialState = {
   companyName: '',
-  bnNumber: null,
+  rcNumber: '',
   purpose: '',
-  rrrNumber: null,
+  rrrNumber: '',
   remarks: ''
 }
 
 export const useRequisitionState = create(set => ({
   ...initialState,
   setCompanyName: name => set({ companyName: name }),
-  setBNNumber: number => set({ bnNumber: number }),
+  setRCNumber: number => set({ rcNumber: number }),
   setPurpose: purpose => set({ purpose }),
   setRRRNumber: number => set({ rrrNumber: number }),
-  setRemarks: remarks => set({ remarks })
+  setRemarks: remarks => set({ remarks }),
+  setInitialState: () => set(initialState)
 }))

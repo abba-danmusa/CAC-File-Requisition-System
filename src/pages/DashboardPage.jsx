@@ -22,7 +22,9 @@ import { mainListItems, secondaryListItems } from '../components/listItems';
 import Chart from '../components/Chart';
 import Request from '../components/Deposits';
 import Orders from '../components/Orders';
-import {primaryColor, secondaryColor} from '../utils/colors'
+import { primaryColor, secondaryColor } from '../utils/colors'
+import { useGetRequests } from '../hooks/useRequest'
+import Skeleton from '@mui/material/Skeleton';
 
 function Copyright(props) {
   return (
@@ -100,6 +102,14 @@ export default function Dashboard() {
   const toggleDrawer = () => {
     setOpen(!open);
   };
+
+  const {
+    isLoading: isLoadingRequest,
+    isSuccess: isSuccessRequest,
+    data: requestData,
+    isError: isRequestError,
+    error: errorRequest
+  } = useGetRequests()
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -191,7 +201,7 @@ export default function Dashboard() {
                   }}
                 >
                   {/* <ApplicationForm/> */}
-                  <Chart />
+                  <Chart request={requestData?.data?.requests} />
 
                 </Paper>
               </Grid>
@@ -210,9 +220,33 @@ export default function Dashboard() {
               </Grid>
               {/* Recent Requests */}
               <Grid item xs={12}>
-                <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-                  <Orders />
-                </Paper>
+                {
+                  isLoadingRequest && (
+                    <Paper sx={{ p: 0, display: 'flex', flexDirection: 'column' }}>
+                      <Skeleton
+                        variant="rectangular"
+                        width={1061}
+                        height={300}
+                        animation={'wave'}
+                      />
+                    </Paper>
+                  ) || (
+                    <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
+                      {
+                        isRequestError && (
+                          <>
+                            <h3>{errorRequest.response?.data?.message || errorRequest?.message}</h3>
+                          </>
+                        )
+                      }
+                      {
+                        isSuccessRequest && (
+                          <Orders data={requestData.data.requests} />
+                        )
+                      }
+                    </Paper>  
+                  )
+                }
               </Grid>
             </Grid>
             <Copyright sx={{ pt: 4 }} />

@@ -11,6 +11,10 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useRequisitionState } from '../hooks/useRequisitionState'
 import { contrastText, darkColor, primaryColor, secondaryColor } from '../utils/colors';
 import PostAddIcon from '@mui/icons-material/PostAdd';
+import { useState } from 'react';
+import Alert from './Alert'
+import { useSendRequest } from '../hooks/useRequest';
+import { Backdrop, CircularProgress } from '@mui/material';
 
 function Copyright(props) {
   return (
@@ -39,17 +43,27 @@ const defaultTheme = createTheme({
 });
 
 export default function RequestForm() {
-  
+  const [inputError, setInputError] = useState('')
+  const {
+    mutate: sendRequest,
+    isLoading: isSendRequestLoading,
+    isError: isRequestError,
+    error: requestError,
+    isSuccess: isRequestSuccess,
+    data: requestData
+  } = useSendRequest()
+
   const {
     companyName,
-    bnNumber,
+    rcNumber,
     purpose,
     rrrNumber,
     setCompanyName,
-    setBNNumber,
+    setRCNumber,
     setPurpose,
     setRRRNumber,
-    setRemarks
+    setRemarks,
+    setInitialState
   } = useRequisitionState()
 
   const handleOnChange = (e) => {
@@ -58,8 +72,8 @@ export default function RequestForm() {
       case 'companyName':
         setCompanyName(value)
         break
-      case 'bnNumber':
-        setBNNumber(value)
+      case 'rcNumber':
+        setRCNumber(value)
         break
       case 'purpose':
         setPurpose(value)
@@ -75,7 +89,7 @@ export default function RequestForm() {
 
   const inputFields = [
     { id: 1, name: 'companyName', label: 'Company Name', value: companyName },
-    { id: 2, name: 'bnNumber', label: 'BN Number', value: bnNumber },
+    { id: 2, name: 'rcNumber', label: 'RC Number', value: rcNumber },
     { id: 4, name: 'rrrNumber', label: 'RRR Number', value: rrrNumber },
     { id: 3, name: 'purpose', label: 'Purpose', value: purpose },
     // { id: 5, name: 'remarks', label: 'Remarks', value: remarks }
@@ -83,15 +97,22 @@ export default function RequestForm() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+    if (!companyName || !rcNumber || !purpose || !rrrNumber) {
+      return setInputError('All inputs are required')
+    }
+    sendRequest({companyName, rcNumber, purpose, rrrNumber})
+    setInitialState()
   };
+
 
   return (
     <ThemeProvider theme={defaultTheme}>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={isSendRequestLoading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
       <Container component="main" maxWidth="sm" sx={{backgroundColor: contrastText}}>
         <CssBaseline />
         <Box
@@ -102,6 +123,21 @@ export default function RequestForm() {
             alignItems: 'center',
           }}
         >
+          {
+            inputError && (
+              <Alert message={inputError} severity={'error'}/>
+            )
+          }
+          {
+            isRequestError && (
+              <Alert message={requestError.response?.data?.message || requestError.message} severity={'error'}/>
+            )
+          }
+          {
+            isRequestSuccess && (
+              <Alert message={requestData.data.message} severity={'success'}/>
+            )
+          }
           <Avatar sx={{ m: 1, bgcolor: primaryColor }}>
             <PostAddIcon />
           </Avatar>

@@ -11,11 +11,13 @@ const steps = [
   'Awaiting File Receive'
 ]
 
-export default function HorizontalLinearAlternativeLabelStepper() {
+// eslint-disable-next-line react/prop-types
+export default function HorizontalLinearAlternativeLabelStepper({ request }) {
   return (
     <>
       <Title>Request Status</Title>
-      <p>Company Name: Elvis Presley</p>
+      {/* eslint-disable-next-line react/prop-types, react/prop-types */}
+      <p>{`Company Name: ${request ? request[0].companyName : ''}`}</p>
       <Box sx={{ width: '100%' }}>
         <Stepper activeStep={1} alternativeLabel>
           {steps.map((label, index) => (
