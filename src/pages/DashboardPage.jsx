@@ -26,6 +26,7 @@ import { primaryColor, secondaryColor } from '../utils/colors'
 import { useGetRequests } from '../hooks/useRequest'
 import Skeleton from '@mui/material/Skeleton';
 import Menu from '@mui/material/Menu';
+import { useNavigate } from 'react-router-dom';
 import MenuItem from '@mui/material/MenuItem'
 
 function Copyright(props) {
@@ -105,6 +106,8 @@ export default function Dashboard() {
     setOpen(!open);
   };
 
+  const navigate = useNavigate()
+
   const {
     isLoading: isLoadingRequest,
     isSuccess: isSuccessRequest,
@@ -121,6 +124,11 @@ export default function Dashboard() {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    navigate('/signin')
+  }
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -181,7 +189,7 @@ export default function Dashboard() {
             >
               <MenuItem onClick={handleClose}>Profile</MenuItem>
               <MenuItem onClick={handleClose}>My account</MenuItem>
-              <MenuItem onClick={handleClose}>Logout</MenuItem>
+              <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </Menu>
           </Toolbar>
         </AppBar>

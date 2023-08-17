@@ -7,6 +7,7 @@ const initialState = {
   department: '',
   staffId: '',
   password: '',
+  accountType: '',
 }
 
 export const useSignupState = create(set => ({
@@ -17,5 +18,6 @@ export const useSignupState = create(set => ({
   setDepartment: (department) => set({ department }),
   setStaffId: (staffId) => set({ staffId }),
   setPassword: (password) => set({ password }),
+  setAccountType: (accountType) => set({ accountType }),
   setInitialState: () => set(initialState)
 }))

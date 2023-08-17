@@ -52,11 +52,12 @@ export default function SignIn({activeTab}) {
         <CssBaseline />
         <Box
           sx={{
-            marginTop: 8,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            width: 250
+            margin: 'auto',
+            marginTop: 15,
+            width: 250,
           }}
         >
           <Avatar sx={{ m: 1, bgcolor: primaryColor }}>
@@ -86,7 +87,7 @@ export default function SignIn({activeTab}) {
           >
             <Theme>
               <TextField
-                variant="standard"
+                variant="outlined"
                 size='small'
                 margin="normal"
                 required
@@ -102,7 +103,7 @@ export default function SignIn({activeTab}) {
             </Theme>
             <Theme>
               <TextField
-                variant="standard"
+                variant="outlined"
                 size='small'
                 margin="normal"
                 required

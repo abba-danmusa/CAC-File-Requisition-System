@@ -17,6 +17,8 @@ import { useState } from 'react';
 import TransitionAlerts from './Alert';
 import { useSignup } from '../hooks/useAuth';
 import SimpleBackdrop from './BackDrop';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+
 
 const departments = [
   { id: 1, name: 'Status Unit', label: 'Status Unit (RG\'s Office)' },
@@ -26,6 +28,7 @@ const departments = [
   { id: 5, name: 'Incorporated Trustee', label: 'Incorporated Trustee' },
   { id: 6, name: 'Business Names', label: 'Business Names' },
   {id: 7, name: 'Registry', label: 'Registry'},
+  {id: 8, name: 'Records Management', label: 'Records Management (RMD)'},
 ]
 
 const ranks = [
@@ -36,6 +39,12 @@ const ranks = [
   { id: 5, name: 'Assistant Director', label: 'Assistant Director' },
   { id: 6, name: 'Deputy Director', label: 'Deputy Director' },
   {id: 7, name: 'Director', label: 'Director'}
+]
+
+const accountTypes = [
+  {id: 1, name: 'Request Account', label: 'Request Account'},
+  { id: 2, name: 'Authorization Account', label: 'Authorization Account' },
+  { id: 3, name: 'Approval Account', label: 'Approval Account' }
 ]
 
 // eslint-disable-next-line react/prop-types
@@ -50,12 +59,14 @@ export default function SignUp({ activeTab }) {
     password,
     department,
     staffId,
+    accountType,
     setUsername,
     setName,
     setRank,
     setPassword,
     setStaffId,
     setDepartment,
+    setAccountType,
     setInitialState
   } = useSignupState()
 
@@ -63,6 +74,7 @@ export default function SignUp({ activeTab }) {
     const { value, name } = event.target
     switch (name) {
       case 'department':
+        setAccountType('')
         setDepartment(value)
         break
       case 'name':
@@ -80,6 +92,9 @@ export default function SignUp({ activeTab }) {
       case 'username':
         setUsername(value)
         break
+      case 'accountType':
+        setAccountType(value)
+        break
     }
   }
 
@@ -94,18 +109,29 @@ export default function SignUp({ activeTab }) {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (!(name || username || rank || password || department || staffId)) {
+    if (!(name || username || rank || password || department || staffId || accountType)) {
       return setInputError('All fields are required')
     }
-    const data = {name, username, rank, password, department, staffId}
+    const data = {name, username, rank, password, department, staffId, accountType}
     signup(data)
-    setInitialState()
+    // setInitialState()
   };
 
+  const defaultTheme = createTheme({
+    palette: {
+      primary: {
+        main: primaryColor,
+        light: secondaryColor,
+        dark: darkColor,
+        contrastText: '#fff'
+      }
+    }
+  })
+
   return (
-    <>
+    <ThemeProvider theme={defaultTheme}>
       <SimpleBackdrop openBackDrop={isSignupLoading} />
-      <Container component="main" maxWidth="xs">
+      <Container component="main" maxWidth='md'>
         <CssBaseline />
         <Box
           sx={{
@@ -147,14 +173,14 @@ export default function SignUp({ activeTab }) {
             )
           }
           
-          <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+          <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3, }}>
             <Grid container spacing={5}>
               
               {/* username */}
               <Grid item xs={12} sm={6}>
                 <Theme>
                   <TextField
-                    variant='standard'
+                    variant='outlined'
                     autoComplete="given-name"
                     name="username"
                     required
@@ -172,7 +198,7 @@ export default function SignUp({ activeTab }) {
               <Grid item xs={12} sm={6}>
                 <Theme>
                   <TextField
-                    variant='standard'
+                    variant='outlined'
                     autoComplete="given-name"
                     name="name"
                     required
@@ -190,7 +216,7 @@ export default function SignUp({ activeTab }) {
                 <FormControl fullWidth>
                   <InputLabel id="rank-label">Staff Rank</InputLabel>
                   <Select
-                    variant='standard'
+                    variant='outlined'
                     required
                     fullWidth
                     id="rank"
@@ -217,7 +243,7 @@ export default function SignUp({ activeTab }) {
                 <FormControl fullWidth>
                   <InputLabel id="department-label">Department</InputLabel>
                   <Select
-                    variant='standard'
+                    variant='outlined'
                     required
                     fullWidth
                     id="department"
@@ -243,7 +269,7 @@ export default function SignUp({ activeTab }) {
               <Grid item xs={12} sm={6}>
                 <Theme>
                   <TextField
-                    variant='standard'
+                    variant='outlined'
                     required
                     fullWidth
                     name="staffId"
@@ -257,11 +283,43 @@ export default function SignUp({ activeTab }) {
                 </Theme>
               </Grid>
 
-              {/* password */}
+              {/* Account Type */}
               <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel id="account-type">Account Type</InputLabel>
+                  <Select
+                    variant='outlined'
+                    required
+                    fullWidth
+                    id="accountType"
+                    label="Staff Rank"
+                    labelId='Rank-label'
+                    value={accountType}
+                    name='accountType'
+                    sx={{textAlign: 'left', borderColor: darkColor, ':hover': {borderColor: primaryColor}}}
+                    onChange={handleOnChange}
+                  >
+                    {
+                      department === 'Records Management' && accountTypes.slice(-1).map(type => 
+                        <MenuItem key={type.id} value={type.name}>
+                          {type.label}
+                        </MenuItem>
+                      ) ||
+                      department !== 'Records Management' && accountTypes.slice(0, 2).map(type => 
+                        <MenuItem key={type.id} value={type.name}>
+                          {type.label}
+                        </MenuItem>
+                      )
+                    }
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              {/* password */}
+              <Grid item xs={12}>
                 <Theme>
                   <TextField
-                    variant='standard'
+                    variant='outlined'
                     required
                     fullWidth
                     name="password"
@@ -304,6 +362,6 @@ export default function SignUp({ activeTab }) {
         </Box>
         <Copyright sx={{ mt: 5 }} />
       </Container>
-    </>
+    </ThemeProvider>
   )
 }
