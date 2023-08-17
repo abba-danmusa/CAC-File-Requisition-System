@@ -25,6 +25,8 @@ import Orders from '../components/Orders';
 import { primaryColor, secondaryColor } from '../utils/colors'
 import { useGetRequests } from '../hooks/useRequest'
 import Skeleton from '@mui/material/Skeleton';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem'
 
 function Copyright(props) {
   return (
@@ -111,6 +113,15 @@ export default function Dashboard() {
     error: errorRequest
   } = useGetRequests()
 
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const openUser = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: 'flex' }}>
@@ -131,7 +142,7 @@ export default function Dashboard() {
                 ...(open && { display: 'none' }),
               }}
             >
-              <MenuIcon />
+            <MenuIcon />
             </IconButton>
             <Typography
               component="h1"
@@ -147,11 +158,31 @@ export default function Dashboard() {
                 <NotificationsIcon />
               </Badge>
             </IconButton>
-            <IconButton color='inherit'>
+            <IconButton
+              color='inherit'
+              id="basic-button"
+              aria-controls={openUser ? 'basic-menu' : undefined}
+              aria-haspopup="true"
+              aria-expanded={openUser ? 'true' : undefined}
+              onClick={handleClick}
+            >
               <Badge color='secondary'>
                 <Person3Icon fontSize='medium'/>
               </Badge>
             </IconButton>
+            <Menu
+              id="basic-menu"
+              anchorEl={anchorEl}
+              open={openUser}
+              onClose={handleClose}
+              MenuListProps={{
+                'aria-labelledby': 'basic-button',
+              }}
+            >
+              <MenuItem onClick={handleClose}>Profile</MenuItem>
+              <MenuItem onClick={handleClose}>My account</MenuItem>
+              <MenuItem onClick={handleClose}>Logout</MenuItem>
+            </Menu>
           </Toolbar>
         </AppBar>
         <Drawer variant="permanent" open={open}>
@@ -241,7 +272,7 @@ export default function Dashboard() {
                       }
                       {
                         isSuccessRequest && (
-                          <Orders data={requestData.data.requests} />
+                          <Orders data={requestData?.data?.requests} />
                         )
                       }
                     </Paper>  
