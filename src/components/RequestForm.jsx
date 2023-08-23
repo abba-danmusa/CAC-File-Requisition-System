@@ -101,7 +101,7 @@ export default function RequestForm() {
       return setInputError('All inputs are required')
     }
     sendRequest({companyName, rcNumber, purpose, rrrNumber})
-    setInitialState()
+    // setInitialState()
   };
 
 

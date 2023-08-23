@@ -1,18 +1,18 @@
 import { useState } from 'react';
 import Typography from '@mui/material/Typography';
-import Title from './Title';
-import AddIcon from '@mui/icons-material/Add';
 import { contrastText, primaryColor, secondaryColor } from '../utils/colors';
 import { Button } from '@mui/material';
 import RequestForm from './RequestForm';
 import Backdrop from '@mui/material/Backdrop';
 import Close from '@mui/icons-material/Close';
 import Slide from '@mui/material/Slide'
-import moment from 'moment';
+import Title from './Title';
+import PostAddIcon from '@mui/icons-material/PostAdd';
 
 export default function Request() {
   
   const [open, setOpen] = useState(false)
+  const user = JSON.parse(localStorage.getItem('user'))
   
   const handleOnClick = () => {
     return setOpen(true)
@@ -21,22 +21,40 @@ export default function Request() {
   const handleClose = () => {
     return setOpen(false)
   }
+
+  const greetings = () => {
+    const now = new Date();
+    const hour = now.getHours();
+    let greeting = '';
+
+    if (hour >= 5 && hour < 12) {
+      greeting = 'Good morning';
+    } else if (hour >= 12 && hour < 18) {
+      greeting = 'Good afternoon';
+    } else {
+      greeting = 'Good evening';
+    }
+    return `${greeting}`
+  }
   
   return (
     <>
-      <Title>Make A File Request</Title>
+      <Title>{`${greetings()}, ${user?.username}`}</Title>
       <Typography color="text.secondary" sx={{ flex: 1 }}>
-        Click on the + button below to request for a file
+        Click on the {<PostAddIcon/>} button below to request for a file
       </Typography>
       {/* TODO make the clock tick */}
-      <p>{moment().format('MMMM Do YYYY, h:mm:ss a')}</p>
+      {/* <p>{moment().format('MMMM Do YYYY, h:mm:ss a')}</p> */}
       <Button
         sx={{
-          width: 'fit-content', alignSelf: 'center', backgroundColor: primaryColor, ":hover": {backgroundColor: secondaryColor}
+          width: 'fit-content',
+          alignSelf: 'center',
+          backgroundColor: primaryColor,
+          ":hover": { backgroundColor: secondaryColor }
         }}
         onClick={handleOnClick}
       >
-        <AddIcon
+        <PostAddIcon
           sx={{ fontSize: 25, color: contrastText }}
         />
       </Button>

@@ -24,7 +24,7 @@ export default function SignIn({activeTab}) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [isInputError, setIsInputError] = useState('')
-  const {mutate: signin, isError, error, isSuccess, data, isLoading} = useSignin()
+  const { mutate: signin, isError, error, isSuccess, data, isLoading } = useSignin()
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -34,8 +34,9 @@ export default function SignIn({activeTab}) {
     signin({ username, password })
   }
 
-  if (isSuccess && data?.data?.token) {
+  if (isSuccess && data?.data?.token && data?.data?.user) {
     localStorage.setItem('token', data?.data?.token)
+    localStorage.setItem('user', JSON.stringify(data.data.user))
   }
 
   useEffect(() => {

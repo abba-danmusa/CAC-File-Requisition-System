@@ -23,11 +23,18 @@ import Chart from '../components/Chart';
 import Request from '../components/Deposits';
 import Orders from '../components/Orders';
 import { primaryColor, secondaryColor } from '../utils/colors'
-import { useGetRequests } from '../hooks/useRequest'
+import { useGetPendingAuthRequests } from '../hooks/useRequest'
 import Skeleton from '@mui/material/Skeleton';
 import Menu from '@mui/material/Menu';
 import { useNavigate } from 'react-router-dom';
 import MenuItem from '@mui/material/MenuItem'
+import Authorizations from '../components/Authorizations'
+import Title from '../components/Title';
+import PostAddIcon from '@mui/icons-material/PostAdd'
+import { useQueryClient } from '@tanstack/react-query';
+import PendingAuthorizations from '../components/PendingAuthorizations';
+import Approval from '../components/Approval';
+import PendingApprovals from '../components/PendingApprovals';
 
 function Copyright(props) {
   return (
@@ -108,13 +115,7 @@ export default function Dashboard() {
 
   const navigate = useNavigate()
 
-  const {
-    isLoading: isLoadingRequest,
-    isSuccess: isSuccessRequest,
-    data: requestData,
-    isError: isRequestError,
-    error: errorRequest
-  } = useGetRequests()
+  const user = JSON.parse(localStorage.getItem('user'))
 
   const [anchorEl, setAnchorEl] = React.useState(null);
   const openUser = Boolean(anchorEl);
@@ -229,18 +230,25 @@ export default function Dashboard() {
           <Toolbar />
           <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
             <Grid container spacing={3}>
-              {/* Recent Request Status */}
+              {/* Recent Request Status || Awaiting Authorization */}
               <Grid item xs={12} md={8} lg={9}>
                 <Paper
                   sx={{
                     p: 2,
                     display: 'flex',
                     flexDirection: 'column',
-                    height: 240,
+                    height: user?.accountType === 'Authorization Account' ? 'fit-content' : 240,
                   }}
                 >
-                  {/* <ApplicationForm/> */}
-                  <Chart request={requestData?.data?.requests} />
+                  {
+                    user?.accountType === 'Authorization Account' && (
+                      <Authorizations/>
+                    ) || user?.accountType === 'Request Account' && (
+                      <Chart/>
+                    ) || user?.accountType === 'Approval Account' && (
+                      <Approval/>
+                    )
+                  }
 
                 </Paper>
               </Grid>
@@ -252,40 +260,33 @@ export default function Dashboard() {
                     display: 'flex',
                     flexDirection: 'column',
                     height: 240,
+                    // boxShadow: 10
                   }}
                 >
-                  <Request />
+                  {
+                    user.accountType === 'Authorization Account' && (
+                      <AwaitingAuthorization />
+                    ) || user.accountType === 'Request Account' && (
+                      <Request/>
+                    ) || user.accountType === 'Approval Account' && (
+                      <AwaitingApproval/>
+                    )
+                  }
                 </Paper>
               </Grid>
               {/* Recent Requests */}
               <Grid item xs={12}>
-                {
-                  isLoadingRequest && (
-                    <Paper sx={{ p: 0, display: 'flex', flexDirection: 'column' }}>
-                      <Skeleton
-                        variant="rectangular"
-                        width={1061}
-                        height={300}
-                        animation={'wave'}
-                      />
-                    </Paper>
-                  ) || (
-                    <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-                      {
-                        isRequestError && (
-                          <>
-                            <h3>{errorRequest.response?.data?.message || errorRequest?.message}</h3>
-                          </>
-                        )
-                      }
-                      {
-                        isSuccessRequest && (
-                          <Orders data={requestData?.data?.requests} />
-                        )
-                      }
-                    </Paper>  
-                  )
-                }
+                <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
+                  {
+                    user.accountType === 'Request Account' && (
+                      <Orders/>
+                    ) || user.accountType === 'Authorization Account' && (
+                      <PendingAuthorizations/>
+                    ) || user.accountType === 'Approval Account' && (
+                      <PendingApprovals/>
+                    )
+                  }
+                </Paper>  
               </Grid>
             </Grid>
             <Copyright sx={{ pt: 4 }} />
@@ -294,4 +295,76 @@ export default function Dashboard() {
       </Box>
     </ThemeProvider>
   );
+}
+
+const AwaitingApproval = () => {
+  const greetings = () => {
+    const now = new Date();
+    const hour = now.getHours();
+    let greeting = '';
+
+    if (hour >= 5 && hour < 12) {
+      greeting = 'Good morning';
+    } else if (hour >= 12 && hour < 18) {
+      greeting = 'Good afternoon';
+    } else {
+      greeting = 'Good evening';
+    }
+    return `${greeting}`
+  }
+
+  const user = JSON.parse(localStorage.getItem('user'))
+  
+  return (
+    <>
+      <Title>{`${greetings()}, ${user?.username}`}</Title>
+      <Typography component="p" variant="h4">
+        {/* {
+          isLoading && <Skeleton width={50} height={50} /> ||
+          data?.data?.requests?.length || 0
+        } */}
+        0
+      </Typography>
+      <Typography color="text.secondary" sx={{ flex: 1 }}>
+        Request(s) Awaiting Approval
+      </Typography>
+    </>
+  )
+}
+
+const AwaitingAuthorization = () => {
+  
+  const { isLoading, data } = useGetPendingAuthRequests()
+
+  const greetings = () => {
+    const now = new Date();
+    const hour = now.getHours();
+    let greeting = '';
+
+    if (hour >= 5 && hour < 12) {
+      greeting = 'Good morning';
+    } else if (hour >= 12 && hour < 18) {
+      greeting = 'Good afternoon';
+    } else {
+      greeting = 'Good evening';
+    }
+    return `${greeting}`
+  }
+
+  const user = JSON.parse(localStorage.getItem('user'))
+  
+  return (
+    <>
+      <Title>{`${greetings()}, ${user?.username}`}</Title>
+      <Typography component="p" variant="h4">
+        {
+          isLoading && <Skeleton width={50} height={50} /> ||
+          data?.data?.requests?.length || 0
+        }
+      </Typography>
+      <Typography color="text.secondary" sx={{ flex: 1 }}>
+        Request(s) Awaiting Authorization
+      </Typography>
+    </>
+  )
 }

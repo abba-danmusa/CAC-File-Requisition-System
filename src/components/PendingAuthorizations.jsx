@@ -1,4 +1,3 @@
-import * as React from 'react';
 import Link from '@mui/material/Link';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -6,23 +5,17 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Title from '../components/Title';
-import moment from 'moment'
 import { Skeleton, Typography } from '@mui/material';
 import { primaryColor } from '../utils/colors';
-import { useGetRequests } from '../hooks/useRequest'
+import { useGetAuthRequests } from '../hooks/useRequest';
+import Row from './Row';
 
-function preventDefault(event) {
-  event.preventDefault();
-}
-
-// eslint-disable-next-line react/prop-types
-export default function Orders() {
-
-  // eslint-disable-next-line react/prop-types
-  const {isLoading,isSuccess,data,isError,error} = useGetRequests()
+function PendingAuthorizations() {
+  
+  const { isLoading, isSuccess, isError, data, error } = useGetAuthRequests()
 
   return (
-    <React.Fragment>
+    <>
       <Title>Recent Requests</Title>
       {
         isError && (
@@ -34,6 +27,7 @@ export default function Orders() {
       <Table size="small">
         <TableHead>
           <TableRow>
+            <TableCell/>
             <TableCell sx={{color: primaryColor}}>Date</TableCell>
             <TableCell sx={{color: primaryColor}}>Company Name</TableCell>
             <TableCell sx={{color: primaryColor}}>RC Number</TableCell>
@@ -52,6 +46,7 @@ export default function Orders() {
                   <TableCell><Skeleton height={25}/></TableCell>
                   <TableCell><Skeleton height={25}/></TableCell>
                   <TableCell><Skeleton height={25}/></TableCell>
+                  <TableCell><Skeleton height={25}/></TableCell>
                 </TableRow>
               )
             )
@@ -59,30 +54,19 @@ export default function Orders() {
           {
             isSuccess && (
               data?.data?.requests?.map(request => 
-                <Row row={request} key={request._id}/>
+                <Row row={request} key={request?._id} initialOpenState={false}/>
               )
             )
           }
         </TableBody>
       </Table>
-      <Link color="primary" href="#" onClick={preventDefault} sx={{ mt: 3 }}>
+      <Link color="primary" href="#" onClick={e=> e.preventDefault()} sx={{ mt: 3 }}>
         See more requests
       </Link>
-    </React.Fragment>
-  );
-}
-
-const skeletonRows = [1,2,3,4,5,6,]
-
-// eslint-disable-next-line react/prop-types
-const Row = ({row}) => {
-  return (
-    <TableRow key={row._id}>
-      <TableCell>{moment(row?.date).format('MMMM Do YYYY, h:mm:ss a')}</TableCell>
-      <TableCell>{row?.companyName}</TableCell>
-      <TableCell>{row?.rcNumber}</TableCell>
-      <TableCell>{row?.rrrNumber}</TableCell>
-      <TableCell align="right">{row?.purpose}</TableCell>
-    </TableRow>
+    </>
   )
 }
+
+const skeletonRows = [1,2,3,4,5]
+
+export default PendingAuthorizations
