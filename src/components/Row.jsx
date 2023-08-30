@@ -77,74 +77,66 @@ function Row({ row, initialOpenState, setAuthorize, setOpenBackdrop}) {
             </Box>
             <Box p={2}>
               {
-                row?.requestStatus.authorization.status === 'pending' && (
-                  <>
-                    <Button
-                      sx={{
-                        width: 100,
-                        alignSelf: 'center',
-                        backgroundColor: primaryColor,
-                        ":hover": { backgroundColor: secondaryColor },
-                        color: contrastText,
-                        margin: 2,
-                        // marginTop: 2
-                      }}
-                      data-id={row?._id}
-                      onClick={() => {
-                        setOpenBackdrop(true)
-                        setAuthorize('AUTHORIZE')
-                      }}            
-                    >
-                      Authorize
-                    </Button>
-                    <Button
-                      sx={{
-                        width: 100,
-                        alignSelf: 'center',
-                        backgroundColor: 'brown',
-                        ":hover": { backgroundColor: 'red' },
-                        color: contrastText,
-                        margin: 2,
-                        // marginTop: 2
-                      }}
-                      onClick={() => {
-                        setOpenBackdrop(true)
-                        setAuthorize('REJECT')
-                      }}
-                    >
-                      Reject
-                    </Button>
-                  </>
-                ) || (
-                  <Grid container spacing={2} alignItems='center'>
-                    <Grid item>
-                      <Title>Status:</Title>
-                    </Grid>
-                    <Grid item>
+                user.accountType === 'Approval Account' && (
+                  <Approval
+                    row={row} 
+                    setAuthorize={setAuthorize}
+                    user={user}
+                    setOpenBackdrop={setOpenBackdrop}
+                  />
+                )
+              }
+              {
+                user.accountType === 'Managing Account' && (
+                  <FileRelease
+                    row={row}
+                    setAuthorize={setAuthorize}
+                    user={user}
+                    setOpenBackdrop={setOpenBackdrop}
+                  />
+                )
+              }
+              {
+                user.accountType === 'Authorization Account' && (
+                  row?.requestStatus?.authorization?.status == 'pending' && (
+                    <>
                       <Button
-                        disabled
-                        size='xs'
                         sx={{
-                          backgroundColor: row?.requestStatus.authorization.status == 'accepted' ? primaryColor : 'brown',
+                          width: 100,
+                          alignSelf: 'center',
+                          backgroundColor: primaryColor,
+                          ":hover": { backgroundColor: secondaryColor },
                           color: contrastText,
-                          borderRadius: 2,
-                          ':disabled': { color: contrastText }
+                          margin: 2,
+                          fontSize: '10px'
+                        }}
+                        data-id={row?._id}
+                        onClick={() => {
+                          setOpenBackdrop(true)
+                          setAuthorize('AUTHORIZE')
+                        }}            
+                      >
+                        Authorize
+                      </Button>
+                      <Button
+                        sx={{
+                          width: 100,
+                          alignSelf: 'center',
+                          backgroundColor: 'brown',
+                          ":hover": { backgroundColor: 'red' },
+                          color: contrastText,
+                          margin: 2,
+                          fontSize: '10px'
+                        }}
+                        onClick={() => {
+                          setOpenBackdrop(true)
+                          setAuthorize('REJECT')
                         }}
                       >
-                        {
-                          row?.requestStatus.authorization.status == 'accepted' ? 'Authorized' : 'Rejected'
-                        }
+                        Reject
                       </Button>
-                    </Grid>
-                    <Grid item>
-                      <Typography>
-                        by: {
-                          user._id === row?.authorizedBy?._id ? 
-                            `You (${row?.authorizedBy?.name})` :
-                            row?.authorizedBy?.name}
-                      </Typography>
-                    </Grid>
-                  </Grid>
+                    </>
+                  )
                 )
               }
             </Box>
@@ -152,6 +144,140 @@ function Row({ row, initialOpenState, setAuthorize, setOpenBackdrop}) {
         </TableCell>
       </TableRow>
     </>
+  )
+}
+
+// eslint-disable-next-line react/prop-types
+const Approval = ({ row, setOpenBackdrop, setAuthorize, user }) => {
+  return (
+    row?.requestStatus.approval.status === 'pending' && (
+      <>
+        <Button
+          sx={{
+            width: 100,
+            alignSelf: 'center',
+            backgroundColor: primaryColor,
+            ":hover": { backgroundColor: secondaryColor },
+            color: contrastText,
+            margin: 2,
+            fontSize: '10px'
+          }}
+          data-id={row?._id}
+          onClick={() => {
+            setOpenBackdrop(true)
+            setAuthorize('APPROVE')
+          }}            
+        >
+          Approve
+        </Button>
+        <Button
+          sx={{
+            width: 100,
+            alignSelf: 'center',
+            backgroundColor: 'brown',
+            ":hover": { backgroundColor: 'red' },
+            color: contrastText,
+            margin: 2,
+            fontSize: '10px'
+          }}
+          onClick={() => {
+            setOpenBackdrop(true)
+            setAuthorize('DISAPPROVE')
+          }}
+        >
+          Disapprove
+        </Button>
+      </>
+    ) || (
+      <Grid container spacing={2} alignItems='center'>
+        <Grid item>
+          <Title>Status:</Title>
+        </Grid>
+        <Grid item>
+          <Button
+            disabled
+            sx={{
+              backgroundColor: row?.requestStatus.approval.status == 'accepted' ? primaryColor : 'brown',
+              color: contrastText,
+              borderRadius: 2,
+              ':disabled': { color: contrastText },
+              fontSize: '10px'
+            }}
+          >
+            {
+              row?.requestStatus.approval.status === 'accepted' ? 'Approved' : 'Disapproved'
+            }
+          </Button>
+        </Grid>
+        <Grid item>
+          <Typography>
+            by: {
+              user._id === row?.approvedBy?._id ? 
+                `You (${row?.approvedBy?.name})` :
+                row?.approvedBy?.name}
+          </Typography>
+        </Grid>
+      </Grid>
+    )
+  )
+}
+
+// eslint-disable-next-line react/prop-types
+const FileRelease = ({ row, setOpenBackdrop, setAuthorize, user }) => {
+  return (
+    row?.requestStatus.fileRelease.status === 'pending' && (
+      <>
+        <Button
+          sx={{
+            width: 100,
+            alignSelf: 'center',
+            backgroundColor: primaryColor,
+            ":hover": { backgroundColor: secondaryColor },
+            color: contrastText,
+            margin: 2,
+            fontSize: '10px'
+          }}
+          data-id={row?._id}
+          onClick={() => {
+            setOpenBackdrop(true)
+            setAuthorize('RELEASE')
+          }}            
+        >
+          Send File
+        </Button>
+        
+      </>
+    ) || (
+      <Grid container spacing={2} alignItems='center'>
+        <Grid item>
+          <Title>Status:</Title>
+        </Grid>
+        <Grid item>
+          <Button
+            disabled
+            sx={{
+              backgroundColor: row?.requestStatus.fileRelease.status == 'accepted' ? primaryColor : 'brown',
+              color: contrastText,
+              borderRadius: 2,
+              ':disabled': { color: contrastText },
+              fontSize: '10px'
+            }}
+          >
+            {
+              row?.requestStatus.fileRelease.status === 'accepted' ? 'Approved' : 'Disapproved'
+            }
+          </Button>
+        </Grid>
+        <Grid item>
+          <Typography>
+            by: {
+              user._id === row?.approvedBy?._id ? 
+                `You (${row?.approvedBy?.name})` :
+                row?.approvedBy?.name}
+          </Typography>
+        </Grid>
+      </Grid>
+    )
   )
 }
 

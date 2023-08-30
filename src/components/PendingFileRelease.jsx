@@ -1,4 +1,3 @@
-// import { useEffect } from 'react'
 import Link from '@mui/material/Link';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -7,13 +6,14 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Title from '../components/Title';
 import { Skeleton, Typography } from '@mui/material';
-import { primaryColor } from '../utils/colors';
-import { useGetAuthRequests } from '../hooks/useRequest';
 import Row from './Row';
+import { primaryColor } from '../utils/colors';
+import { usePendingReleases } from '../hooks/useRequest';
 
-function PendingAuthorizations() {
+function PendingFileRelease() {
   
-  const { isLoading, isSuccess, isError, data, error } = useGetAuthRequests()
+  const {isError, error, isSuccess, data, isLoading} = usePendingReleases() 
+  const skeletonRows = [1,2,3,4,5]
 
   return (
     <>
@@ -68,6 +68,4 @@ function PendingAuthorizations() {
   )
 }
 
-const skeletonRows = [1,2,3,4,5]
-
-export default PendingAuthorizations
+export default PendingFileRelease

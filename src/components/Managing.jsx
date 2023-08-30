@@ -4,7 +4,6 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Title from '../components/Title';
-import { usePendingApproval } from '../hooks/useRequest'
 import { Button, Grid} from '@mui/material';
 import { contrastText, primaryColor, secondaryColor } from '../utils/colors';
 import Skeleton from '@mui/material/Skeleton';
@@ -12,32 +11,31 @@ import Row from './Row';
 import Alert from './Alert'
 import { Backdrop, Box, Slide, TextareaAutosize } from '@mui/material';
 import { useState } from 'react'
+import { usePendingFileRelease, useSendFile} from '../hooks/useRequest'
 import { styled } from '@mui/system'
-import { useApproveRequest } from '../hooks/useRequest'
 import Theme from './Theme'
 
-function Approval() {
-
+function Managing() {
   const [remarks, setRemarks] = useState('')
-  
+
   const {
     isLoading, 
     isSuccess,
     isError,
     data,
     error
-  } = usePendingApproval()
+  } = usePendingFileRelease()
 
   const [openBackdrop, setOpenBackdrop] = useState(false)
   const [authorize, setAuthorize] = useState('')
 
-  const { mutate, isSuccess: isAuthSuccess, data: authData, isError: isAuthError, error: authError } = useApproveRequest()
+  const { mutate, isSuccess: isAuthSuccess, data: authData, isError: isAuthError, error: authError } = useSendFile()
   
   const authorizeRequest = e => {
     let data = {
       id: e.target.dataset.id,
       status: e.target.dataset.status,
-      remarks: remarks
+      remarks
     }
     
     mutate(data)
@@ -67,9 +65,9 @@ function Approval() {
         )
       }
       {
-        authorize === 'APPROVE' && openBackdrop && (
+        authorize === 'RELEASE' && openBackdrop && (
           <Modal
-            message={'approve'}
+            message={'send file'}
             openBackdrop={openBackdrop}
             status={'accepted'}
             id={data?.data?.request?.[0]?._id}
@@ -78,21 +76,9 @@ function Approval() {
             remarks={remarks}
             setRemarks={setRemarks}
           />
-        ) ||
-        authorize === 'DISAPPROVE' && openBackdrop && (
-          <Modal
-            message={'disapprove'}
-            openBackdrop={openBackdrop}
-            status={'rejected'}
-            id={data?.data?.request?.[0]?._id}
-            setOpenBackdrop={setOpenBackdrop}
-            authorizeRequest={authorizeRequest}
-            remarks={remarks}
-            setRemarks={setRemarks}
-          />
         )
       }
-      <Title>Awaiting Approval</Title>
+      <Title>Awaiting File Release</Title>
       <Table size="small">
         <TableHead>
           <TableRow>
@@ -140,34 +126,6 @@ function Approval() {
         alignSelf={'center'}
         display={error?.response?.status == 404 || isLoading ? 'none' : ''}
       >
-        {/* <Button
-          sx={{
-            width: 100,
-            alignSelf: 'center',
-            backgroundColor: primaryColor,
-            ":hover": { backgroundColor: secondaryColor },
-            color: contrastText,
-            margin: 2,
-            // marginTop: 2
-          }}
-          onClick={authorizeRequest}
-        >
-          Authorize
-        </Button>
-        <Button
-          sx={{
-            width: 100,
-            alignSelf: 'center',
-            backgroundColor: 'brown',
-            ":hover": { backgroundColor: 'red' },
-            color: contrastText,
-            margin: 2,
-            // marginTop: 2
-          }}
-          onClick={authorizeRequest}
-        >
-          Reject
-        </Button> */}
       </Grid>
     </>
   )
@@ -191,7 +149,7 @@ const StyledTextarea = styled(TextareaAutosize)(
 )
 
 // eslint-disable-next-line react/prop-types
-const Modal = ({ openBackdrop, message, status, authorizeRequest, id, setOpenBackdrop, remarks, setRemarks}) => {
+const Modal = ({ openBackdrop, status, authorizeRequest, id, setOpenBackdrop, remarks, setRemarks}) => {
   
   return (
     <Slide direction="left" in={openBackdrop} mountOnEnter unmountOnExit>
@@ -206,29 +164,30 @@ const Modal = ({ openBackdrop, message, status, authorizeRequest, id, setOpenBac
             alignItems: 'center',
             borderRadius: 2,
             boxShadow: 10,
-            padding: 3,
             height: 'fit-content'
           }}
         >
-          <h2 style={{color: 'black', textAlign: 'center'}}>
-            You are about to {message} this request!
-          </h2>
-          
-          <Theme>
-            <StyledTextarea
-              variant="outlined"
-              placeholder='Remarks? (optional)'
-              minRows={3}
-              margin="normal"
-              fullWidth
-              id="remarks"
-              label="Remarks"
-              name="remarks"
-              autoFocus
-              value={remarks}
-              onChange={(e) => setRemarks(e.target.value)}
-            />
-          </Theme>
+          <Box color={'black'} paddingX={3}>
+            <h2 style={{textAlign: 'center'}}>You are about to send this file!</h2>
+            <h4>NOTE:</h4>
+            <p style={{color: 'charcoal'}}>1. Make sure the file is ready and on its way before confirming</p>
+            <p style={{ color: 'charcoal' }}>2. Make sure the receiving party confirm the receipt of the file</p>
+            <Theme>
+              <StyledTextarea
+                variant="outlined"
+                placeholder='Remarks? (optional)'
+                minRows={3}
+                margin="normal"
+                fullWidth
+                id="remarks"
+                label="Remarks"
+                name="remarks"
+                autoFocus
+                value={remarks}
+                onChange={(e) => setRemarks(e.target.value)}
+              />
+            </Theme>
+          </Box>
           <Box align='center'>
             <Button
               sx={{
@@ -267,4 +226,4 @@ const Modal = ({ openBackdrop, message, status, authorizeRequest, id, setOpenBac
   )
 }
 
-export default Approval
+export default Managing

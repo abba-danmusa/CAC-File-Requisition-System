@@ -23,18 +23,18 @@ import Chart from '../components/Chart';
 import Request from '../components/Deposits';
 import Orders from '../components/Orders';
 import { primaryColor, secondaryColor } from '../utils/colors'
-import { useGetPendingAuthRequests } from '../hooks/useRequest'
+import { useGetPendingAuthRequests, usePendingApprovalCount, usePendingReleaseCount } from '../hooks/useRequest'
 import Skeleton from '@mui/material/Skeleton';
 import Menu from '@mui/material/Menu';
 import { useNavigate } from 'react-router-dom';
 import MenuItem from '@mui/material/MenuItem'
 import Authorizations from '../components/Authorizations'
 import Title from '../components/Title';
-import PostAddIcon from '@mui/icons-material/PostAdd'
-import { useQueryClient } from '@tanstack/react-query';
 import PendingAuthorizations from '../components/PendingAuthorizations';
 import Approval from '../components/Approval';
 import PendingApprovals from '../components/PendingApprovals';
+import Managing from '../components/Managing';
+import PendingFileRelease from '../components/PendingFileRelease';
 
 function Copyright(props) {
   return (
@@ -237,7 +237,8 @@ export default function Dashboard() {
                     p: 2,
                     display: 'flex',
                     flexDirection: 'column',
-                    height: user?.accountType === 'Authorization Account' ? 'fit-content' : 240,
+                    minHeight: 240
+                    // height: user?.accountType !== 'Request Account' ? 'fit-content' : 240,
                   }}
                 >
                   {
@@ -247,6 +248,8 @@ export default function Dashboard() {
                       <Chart/>
                     ) || user?.accountType === 'Approval Account' && (
                       <Approval/>
+                    ) || user?.accountType === 'Managing Account' && (
+                      <Managing/>
                     )
                   }
 
@@ -270,6 +273,8 @@ export default function Dashboard() {
                       <Request/>
                     ) || user.accountType === 'Approval Account' && (
                       <AwaitingApproval/>
+                    ) || user.accountType === 'Managing Account' && (
+                      <AwaitingFileRelease/>
                     )
                   }
                 </Paper>
@@ -284,6 +289,8 @@ export default function Dashboard() {
                       <PendingAuthorizations/>
                     ) || user.accountType === 'Approval Account' && (
                       <PendingApprovals/>
+                    ) || user.accountType === 'Managing Account' && (
+                      <PendingFileRelease/>
                     )
                   }
                 </Paper>  
@@ -298,6 +305,9 @@ export default function Dashboard() {
 }
 
 const AwaitingApproval = () => {
+
+  const {isLoading, data, isSuccess} = usePendingApprovalCount()
+  
   const greetings = () => {
     const now = new Date();
     const hour = now.getHours();
@@ -319,14 +329,50 @@ const AwaitingApproval = () => {
     <>
       <Title>{`${greetings()}, ${user?.username}`}</Title>
       <Typography component="p" variant="h4">
-        {/* {
-          isLoading && <Skeleton width={50} height={50} /> ||
-          data?.data?.requests?.length || 0
-        } */}
-        0
+        {
+          isLoading && <Skeleton width={50} height={50} />
+        }
+        {isSuccess && data?.data?.pendingApprovalCount}
       </Typography>
       <Typography color="text.secondary" sx={{ flex: 1 }}>
         Request(s) Awaiting Approval
+      </Typography>
+    </>
+  )
+}
+
+const AwaitingFileRelease = () => {
+
+  const { isLoading, data, isSuccess } = usePendingReleaseCount()
+  
+  const greetings = () => {
+    const now = new Date();
+    const hour = now.getHours();
+    let greeting = '';
+
+    if (hour >= 5 && hour < 12) {
+      greeting = 'Good morning';
+    } else if (hour >= 12 && hour < 18) {
+      greeting = 'Good afternoon';
+    } else {
+      greeting = 'Good evening';
+    }
+    return `${greeting}`
+  }
+
+  const user = JSON.parse(localStorage.getItem('user'))
+  
+  return (
+    <>
+      <Title>{`${greetings()}, ${user?.username}`}</Title>
+      <Typography component="p" variant="h4">
+        {
+          isLoading && <Skeleton width={50} height={50} />
+        }
+        {isSuccess && data?.data?.pendingReleaseCount}
+      </Typography>
+      <Typography color="text.secondary" sx={{ flex: 1 }}>
+        Request(s) Awaiting Release
       </Typography>
     </>
   )

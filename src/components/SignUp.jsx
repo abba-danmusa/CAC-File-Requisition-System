@@ -25,7 +25,7 @@ const departments = [
   { id: 2, name: 'CTC', label: 'CTC' },
   { id: 3, name: 'Compliance', label: 'Compliance' },
   { id: 4, name: 'SPU', label: 'SPU' },
-  { id: 5, name: 'Incorporated Trustee', label: 'Incorporated Trustee' },
+  { id: 5, name: 'Incorporated Trustee', label: 'Incorporated Trustees' },
   { id: 6, name: 'Business Names', label: 'Business Names' },
   {id: 7, name: 'Registry', label: 'Registry'},
   {id: 8, name: 'Records Management', label: 'Records Management (RMD)'},
@@ -44,7 +44,22 @@ const ranks = [
 const accountTypes = [
   {id: 1, name: 'Request Account', label: 'Request Account'},
   { id: 2, name: 'Authorization Account', label: 'Authorization Account' },
-  { id: 3, name: 'Approval Account', label: 'Approval Account' }
+  { id: 3, name: 'Approval Account', label: 'Approval Account' },
+  {id: 4, name: 'Managing Account', label: 'File Managing Account'}
+]
+
+const sections = [
+  { id: 1, name: 'Wing A', label: 'Wing A' },
+  { id: 2, name: 'Wing B Team 1', label: 'Wing B, Team 1' },
+  { id: 3, name: 'Wing B Team 2', label: 'Wing B, Team 2' },
+  { id: 4, name: 'Wing B Team 3', label: 'Wing B, Team 3' },
+  { id: 5, name: 'Wing B Team 4', label: 'Wing B, Team 4' },
+  { id: 6, name: 'Wing B Team 5', label: 'Wing B, Team 5' },
+  { id: 7, name: 'Wing B Team 6', label: 'Wing B, Team 6' },
+  { id: 8, name: 'Wing B Team 7', label: 'Wing B, Team 7' },
+  { id: 9, name: 'Wing B Team 5', label: 'Wing B, Team 5' },
+  { id: 10, name: 'Incorporated Trustees', label: 'Incorporated Trustees' },
+  { id: 11, name: 'Business Names', label: 'Business Names' },
 ]
 
 // eslint-disable-next-line react/prop-types
@@ -60,6 +75,7 @@ export default function SignUp({ activeTab }) {
     department,
     staffId,
     accountType,
+    section,
     setUsername,
     setName,
     setRank,
@@ -67,6 +83,7 @@ export default function SignUp({ activeTab }) {
     setStaffId,
     setDepartment,
     setAccountType,
+    setSection,
     setInitialState
   } = useSignupState()
 
@@ -95,6 +112,9 @@ export default function SignUp({ activeTab }) {
       case 'accountType':
         setAccountType(value)
         break
+      case 'section':
+        setSection(value)
+        break
     }
   }
 
@@ -109,10 +129,10 @@ export default function SignUp({ activeTab }) {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (!(name || username || rank || password || department || staffId || accountType)) {
+    if (!(name || username || rank || password || department || staffId || accountType || section)) {
       return setInputError('All fields are required')
     }
-    const data = {name, username, rank, password, department, staffId, accountType}
+    const data = {name, username, rank, password, department, staffId, accountType, section}
     signup(data)
     // setInitialState()
   };
@@ -300,7 +320,7 @@ export default function SignUp({ activeTab }) {
                     onChange={handleOnChange}
                   >
                     {
-                      department === 'Records Management' && accountTypes.slice(-1).map(type => 
+                      department === 'Records Management' && accountTypes.slice(2).map(type => 
                         <MenuItem key={type.id} value={type.name}>
                           {type.label}
                         </MenuItem>
@@ -315,8 +335,39 @@ export default function SignUp({ activeTab }) {
                 </FormControl>
               </Grid>
 
+              {/* Section */}
+              {
+                accountType === 'Managing Account' && (
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth>
+                      <InputLabel id="section">Section</InputLabel>
+                      <Select
+                        variant='outlined'
+                        required
+                        fullWidth
+                        id="section"
+                        label="section"
+                        labelId='section'
+                        value={section}
+                        name='section'
+                        sx={{textAlign: 'left', borderColor: darkColor, ':hover': {borderColor: primaryColor}}}
+                        onChange={handleOnChange}
+                      >
+                        {
+                          sections.map(type => 
+                            <MenuItem key={type.id} value={type.name}>
+                              {type.label}
+                            </MenuItem>
+                          )
+                        }
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                )
+              }
+
               {/* password */}
-              <Grid item xs={12}>
+              <Grid item xs={12} sm={accountType === 'Managing Account' ? 6 : undefined}>
                 <Theme>
                   <TextField
                     variant='outlined'

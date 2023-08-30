@@ -10,9 +10,11 @@ import { contrastText, primaryColor, secondaryColor } from '../utils/colors';
 import Skeleton from '@mui/material/Skeleton';
 import Row from './Row';
 import Alert from './Alert'
-import { Backdrop, Box, Slide, Typography } from '@mui/material';
+import { Backdrop, Box, Slide, Typography, TextareaAutosize } from '@mui/material';
+import { styled } from '@mui/system';
 import { useState } from 'react'
-import {useAuthorizeRequest} from '../hooks/useRequest'
+import { useAuthorizeRequest } from '../hooks/useRequest'
+import Theme from './Theme'
 
 function Authorizations() {
 
@@ -26,15 +28,16 @@ function Authorizations() {
 
   const [openBackdrop, setOpenBackdrop] = useState(false)
   const [authorize, setAuthorize] = useState('')
+  const [remarks, setRemarks] = useState('')
 
   const { mutate, isSuccess: isAuthSuccess, data: authData, isError: isAuthError, error: authError } = useAuthorizeRequest()
   
   const authorizeRequest = e => {
     let data = {
       id: e.target.dataset.id,
-      status: e.target.dataset.status
+      status: e.target.dataset.status,
+      remarks
     }
-    console.log(data)
     mutate(data)
     setOpenBackdrop(false)
     setAuthorize('')
@@ -71,6 +74,8 @@ function Authorizations() {
             id={data?.data?.requests?.[0]?._id}
             setOpenBackdrop={setOpenBackdrop}
             authorizeRequest={authorizeRequest}
+            remarks={remarks}
+            setRemarks={setRemarks}
           />
         ) ||
         authorize === 'REJECT' && openBackdrop && (
@@ -81,6 +86,8 @@ function Authorizations() {
             id={data?.data?.requests?.[0]?._id}
             setOpenBackdrop={setOpenBackdrop}
             authorizeRequest={authorizeRequest}
+            remarks={remarks}
+            setRemarks={setRemarks}
           />
         )
       }
@@ -165,8 +172,25 @@ function Authorizations() {
   )
 }
 
+const StyledTextarea = styled(TextareaAutosize)(
+  () => `
+    width: 100%;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    padding: 12px;
+    &:hover {
+      border-color: ${primaryColor};
+    }
+  
+    &:focus {
+      border-color: ${primaryColor};
+    }
+  `
+)
+
 // eslint-disable-next-line react/prop-types
-const Modal = ({ openBackdrop, message, status, authorizeRequest, id, setOpenBackdrop}) => {
+const Modal = ({ openBackdrop, message, status, authorizeRequest, id, setOpenBackdrop, remarks, setRemarks}) => {
   
   return (
     <Slide direction="left" in={openBackdrop} mountOnEnter unmountOnExit>
@@ -181,12 +205,29 @@ const Modal = ({ openBackdrop, message, status, authorizeRequest, id, setOpenBac
             alignItems: 'center',
             borderRadius: 2,
             boxShadow: 10,
-            height: 250
+            padding: 3,
+            height: 'fit-content'
           }}
         >
-          <Typography variant="h6" gutterBottom component="div" color={'black'} p={5} pb={10}>
+          <h2 style={{color: 'black', textAlign: 'center'}}>
             You are about to {message} this request!
-          </Typography>
+          </h2>
+          
+          <Theme>
+            <StyledTextarea
+              variant="outlined"
+              placeholder='Remarks? (optional)'
+              minRows={3}
+              margin="normal"
+              fullWidth
+              id="remarks"
+              label="Remarks"
+              name="remarks"
+              autoFocus
+              value={remarks}
+              onChange={(e) => setRemarks(e.target.value)}
+            />
+          </Theme>
           <Box align='center'>
             <Button
               sx={{
@@ -196,6 +237,7 @@ const Modal = ({ openBackdrop, message, status, authorizeRequest, id, setOpenBac
                 ":hover": { backgroundColor: secondaryColor },
                 color: contrastText,
                 margin: 2,
+                fontSize: '10px'
               }}
               data-id={id}
               data-status={status}
@@ -211,6 +253,7 @@ const Modal = ({ openBackdrop, message, status, authorizeRequest, id, setOpenBac
                 ":hover": { backgroundColor: 'red' },
                 color: contrastText,
                 margin: 2,
+                fontSize: '10px'
               }}
               onClick={() => setOpenBackdrop(false)}
             >

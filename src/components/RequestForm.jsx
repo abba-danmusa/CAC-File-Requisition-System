@@ -15,6 +15,7 @@ import { useState } from 'react';
 import Alert from './Alert'
 import { useSendRequest } from '../hooks/useRequest';
 import { Backdrop, CircularProgress } from '@mui/material';
+import {FormControl, InputLabel, Select, MenuItem} from '@mui/material'
 
 function Copyright(props) {
   return (
@@ -58,11 +59,13 @@ export default function RequestForm() {
     rcNumber,
     purpose,
     rrrNumber,
+    companyType,
     setCompanyName,
     setRCNumber,
     setPurpose,
     setRRRNumber,
     setRemarks,
+    setCompanyType,
     setInitialState
   } = useRequisitionState()
 
@@ -71,6 +74,9 @@ export default function RequestForm() {
     switch (name) {
       case 'companyName':
         setCompanyName(value)
+        break
+      case 'companyType':
+        setCompanyType(value)
         break
       case 'rcNumber':
         setRCNumber(value)
@@ -95,12 +101,18 @@ export default function RequestForm() {
     // { id: 5, name: 'remarks', label: 'Remarks', value: remarks }
   ]
 
+  const companyTypes = [
+    { id: 1, name: 'IT', label: 'Incorporated Trustee' },
+    { id: 2, name: 'LLC/GTE', label: 'Limited Liability Company/GTE' },
+    {id: 3, name: 'BN', label: 'Business Name'}
+  ]
+
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (!companyName || !rcNumber || !purpose || !rrrNumber) {
+    if (!companyName || !rcNumber || !purpose || !rrrNumber || !companyType) {
       return setInputError('All inputs are required')
     }
-    sendRequest({companyName, rcNumber, purpose, rrrNumber})
+    sendRequest({companyName, rcNumber, purpose, rrrNumber, companyType})
     // setInitialState()
   };
 
@@ -164,6 +176,32 @@ export default function RequestForm() {
                   )
                 })
               }
+              
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel id="company-type">Company Type</InputLabel>
+                  <Select
+                    variant='outlined'
+                    required
+                    fullWidth
+                    id="companyType"
+                    label="companyType"
+                    labelId='company-type'
+                    value={companyType}
+                    name='companyType'
+                    sx={{textAlign: 'left', borderColor: darkColor, ':hover': {borderColor: primaryColor}}}
+                    onChange={handleOnChange}
+                  >
+                    {
+                      companyTypes.map(type => (
+                        <MenuItem key={type.id} value={type.name}>
+                          {type.label}
+                        </MenuItem>
+                      ))
+                    }
+                  </Select>
+                </FormControl>
+              </Grid>
             </Grid>
             <Button
               type="submit"
