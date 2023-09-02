@@ -16,7 +16,7 @@ import { primaryColor, secondaryColor, contrastText } from '../utils/colors';
 import Title from './Title';
 
 // eslint-disable-next-line react/prop-types
-function Row({ row, initialOpenState, setAuthorize, setOpenBackdrop}) {
+function Row({ row, initialOpenState, setAuthorize, setOpenBackdrop, setId}) {
   
   const [open, setOpen] = useState(initialOpenState)
   const user = JSON.parse(localStorage.getItem('user'))
@@ -46,7 +46,7 @@ function Row({ row, initialOpenState, setAuthorize, setOpenBackdrop}) {
             in={open}
             timeout="auto"
             unmountOnExit
-            sx={{ boxShadow: 5, borderRadius: 2, paddingTop: 2 }}
+            sx={{ boxShadow: 20, borderRadius: 2, padding: 3 }}
           >
             <Box sx={{ margin: 1 }}>
               <Typography variant="h6" gutterBottom component="div">
@@ -83,6 +83,7 @@ function Row({ row, initialOpenState, setAuthorize, setOpenBackdrop}) {
                     setAuthorize={setAuthorize}
                     user={user}
                     setOpenBackdrop={setOpenBackdrop}
+                    setId={setId}
                   />
                 )
               }
@@ -93,6 +94,7 @@ function Row({ row, initialOpenState, setAuthorize, setOpenBackdrop}) {
                     setAuthorize={setAuthorize}
                     user={user}
                     setOpenBackdrop={setOpenBackdrop}
+                    setId={setId}
                   />
                 )
               }
@@ -112,6 +114,7 @@ function Row({ row, initialOpenState, setAuthorize, setOpenBackdrop}) {
                         }}
                         data-id={row?._id}
                         onClick={() => {
+                          setId(row._id)
                           setOpenBackdrop(true)
                           setAuthorize('AUTHORIZE')
                         }}            
@@ -129,6 +132,7 @@ function Row({ row, initialOpenState, setAuthorize, setOpenBackdrop}) {
                           fontSize: '10px'
                         }}
                         onClick={() => {
+                          setId(row._id)
                           setOpenBackdrop(true)
                           setAuthorize('REJECT')
                         }}
@@ -148,7 +152,7 @@ function Row({ row, initialOpenState, setAuthorize, setOpenBackdrop}) {
 }
 
 // eslint-disable-next-line react/prop-types
-const Approval = ({ row, setOpenBackdrop, setAuthorize, user }) => {
+const Approval = ({ row, setOpenBackdrop, setAuthorize, user, setId}) => {
   return (
     row?.requestStatus.approval.status === 'pending' && (
       <>
@@ -164,6 +168,7 @@ const Approval = ({ row, setOpenBackdrop, setAuthorize, user }) => {
           }}
           data-id={row?._id}
           onClick={() => {
+            setId(row?._id)
             setOpenBackdrop(true)
             setAuthorize('APPROVE')
           }}            
@@ -181,6 +186,7 @@ const Approval = ({ row, setOpenBackdrop, setAuthorize, user }) => {
             fontSize: '10px'
           }}
           onClick={() => {
+            setId(row?._id)
             setOpenBackdrop(true)
             setAuthorize('DISAPPROVE')
           }}
@@ -223,7 +229,7 @@ const Approval = ({ row, setOpenBackdrop, setAuthorize, user }) => {
 }
 
 // eslint-disable-next-line react/prop-types
-const FileRelease = ({ row, setOpenBackdrop, setAuthorize, user }) => {
+const FileRelease = ({ row, setOpenBackdrop, setAuthorize, user, setId }) => {
   return (
     row?.requestStatus.fileRelease.status === 'pending' && (
       <>
@@ -237,8 +243,8 @@ const FileRelease = ({ row, setOpenBackdrop, setAuthorize, user }) => {
             margin: 2,
             fontSize: '10px'
           }}
-          data-id={row?._id}
           onClick={() => {
+            setId(row?._id)
             setOpenBackdrop(true)
             setAuthorize('RELEASE')
           }}            

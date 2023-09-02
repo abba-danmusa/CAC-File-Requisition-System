@@ -10,44 +10,17 @@ import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import Badge from '@mui/material/Badge';
-import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
-import Link from '@mui/material/Link';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import Person3Icon from '@mui/icons-material/Person3';
-import { mainListItems, secondaryListItems } from '../components/listItems';
-import Chart from '../components/Chart';
-import Request from '../components/Deposits';
-import Orders from '../components/Orders';
+import Person3Icon from '@mui/icons-material/Person3'
 import { primaryColor, secondaryColor } from '../utils/colors'
-import { useGetPendingAuthRequests, usePendingApprovalCount, usePendingReleaseCount } from '../hooks/useRequest'
-import Skeleton from '@mui/material/Skeleton';
 import Menu from '@mui/material/Menu';
 import { useNavigate } from 'react-router-dom';
 import MenuItem from '@mui/material/MenuItem'
-import Authorizations from '../components/Authorizations'
-import Title from '../components/Title';
-import PendingAuthorizations from '../components/PendingAuthorizations';
-import Approval from '../components/Approval';
-import PendingApprovals from '../components/PendingApprovals';
-import Managing from '../components/Managing';
-import PendingFileRelease from '../components/PendingFileRelease';
-
-function Copyright(props) {
-  return (
-    <Typography variant="body2" color="text.secondary" align="center" {...props}>
-      {'Copyright © '}
-      <Link color="inherit" href="#">
-        CAC
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
+import UserMenu from '../components/Menu'
+import UserDashboard from './UserDashboard';
+import { useTab } from '../hooks/useTab';
 
 const drawerWidth = 240;
 
@@ -116,6 +89,7 @@ export default function Dashboard() {
   const navigate = useNavigate()
 
   const user = JSON.parse(localStorage.getItem('user'))
+  const {currentTab} = useTab()
 
   const [anchorEl, setAnchorEl] = React.useState(null);
   const openUser = Boolean(anchorEl);
@@ -160,7 +134,7 @@ export default function Dashboard() {
               noWrap
               sx={{ flexGrow: 1 }}
             >
-              Dashboard
+              {currentTab}
             </Typography>
             <IconButton color="inherit">
               <Badge badgeContent={4} color="error">
@@ -210,9 +184,7 @@ export default function Dashboard() {
           </Toolbar>
           <Divider />
           <List component="nav">
-            {mainListItems}
-            <Divider sx={{ my: 1 }} />
-            {secondaryListItems}
+            <UserMenu accountType={user.accountType}/>
           </List>
         </Drawer>
         <Box
@@ -220,7 +192,9 @@ export default function Dashboard() {
           sx={{
             backgroundColor: (theme) =>
               theme.palette.mode === 'light'
-                ? theme.palette.grey[100]
+                ?
+                theme.palette.grey[100]
+                // 'transparent'
                 : theme.palette.grey[900],
             flexGrow: 1,
             height: '100vh',
@@ -228,189 +202,9 @@ export default function Dashboard() {
           }}
         >
           <Toolbar />
-          <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-            <Grid container spacing={3}>
-              {/* Recent Request Status || Awaiting Authorization */}
-              <Grid item xs={12} md={8} lg={9}>
-                <Paper
-                  sx={{
-                    p: 2,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    minHeight: 240
-                    // height: user?.accountType !== 'Request Account' ? 'fit-content' : 240,
-                  }}
-                >
-                  {
-                    user?.accountType === 'Authorization Account' && (
-                      <Authorizations/>
-                    ) || user?.accountType === 'Request Account' && (
-                      <Chart/>
-                    ) || user?.accountType === 'Approval Account' && (
-                      <Approval/>
-                    ) || user?.accountType === 'Managing Account' && (
-                      <Managing/>
-                    )
-                  }
-
-                </Paper>
-              </Grid>
-              {/* New Request */}
-              <Grid item xs={12} md={4} lg={3}>
-                <Paper
-                  sx={{
-                    p: 2,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    height: 240,
-                    // boxShadow: 10
-                  }}
-                >
-                  {
-                    user.accountType === 'Authorization Account' && (
-                      <AwaitingAuthorization />
-                    ) || user.accountType === 'Request Account' && (
-                      <Request/>
-                    ) || user.accountType === 'Approval Account' && (
-                      <AwaitingApproval/>
-                    ) || user.accountType === 'Managing Account' && (
-                      <AwaitingFileRelease/>
-                    )
-                  }
-                </Paper>
-              </Grid>
-              {/* Recent Requests */}
-              <Grid item xs={12}>
-                <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-                  {
-                    user.accountType === 'Request Account' && (
-                      <Orders/>
-                    ) || user.accountType === 'Authorization Account' && (
-                      <PendingAuthorizations/>
-                    ) || user.accountType === 'Approval Account' && (
-                      <PendingApprovals/>
-                    ) || user.accountType === 'Managing Account' && (
-                      <PendingFileRelease/>
-                    )
-                  }
-                </Paper>  
-              </Grid>
-            </Grid>
-            <Copyright sx={{ pt: 4 }} />
-          </Container>
+          <UserDashboard/>
         </Box>
       </Box>
     </ThemeProvider>
   );
-}
-
-const AwaitingApproval = () => {
-
-  const {isLoading, data, isSuccess} = usePendingApprovalCount()
-  
-  const greetings = () => {
-    const now = new Date();
-    const hour = now.getHours();
-    let greeting = '';
-
-    if (hour >= 5 && hour < 12) {
-      greeting = 'Good morning';
-    } else if (hour >= 12 && hour < 18) {
-      greeting = 'Good afternoon';
-    } else {
-      greeting = 'Good evening';
-    }
-    return `${greeting}`
-  }
-
-  const user = JSON.parse(localStorage.getItem('user'))
-  
-  return (
-    <>
-      <Title>{`${greetings()}, ${user?.username}`}</Title>
-      <Typography component="p" variant="h4">
-        {
-          isLoading && <Skeleton width={50} height={50} />
-        }
-        {isSuccess && data?.data?.pendingApprovalCount}
-      </Typography>
-      <Typography color="text.secondary" sx={{ flex: 1 }}>
-        Request(s) Awaiting Approval
-      </Typography>
-    </>
-  )
-}
-
-const AwaitingFileRelease = () => {
-
-  const { isLoading, data, isSuccess } = usePendingReleaseCount()
-  
-  const greetings = () => {
-    const now = new Date();
-    const hour = now.getHours();
-    let greeting = '';
-
-    if (hour >= 5 && hour < 12) {
-      greeting = 'Good morning';
-    } else if (hour >= 12 && hour < 18) {
-      greeting = 'Good afternoon';
-    } else {
-      greeting = 'Good evening';
-    }
-    return `${greeting}`
-  }
-
-  const user = JSON.parse(localStorage.getItem('user'))
-  
-  return (
-    <>
-      <Title>{`${greetings()}, ${user?.username}`}</Title>
-      <Typography component="p" variant="h4">
-        {
-          isLoading && <Skeleton width={50} height={50} />
-        }
-        {isSuccess && data?.data?.pendingReleaseCount}
-      </Typography>
-      <Typography color="text.secondary" sx={{ flex: 1 }}>
-        Request(s) Awaiting Release
-      </Typography>
-    </>
-  )
-}
-
-const AwaitingAuthorization = () => {
-  
-  const { isLoading, data } = useGetPendingAuthRequests()
-
-  const greetings = () => {
-    const now = new Date();
-    const hour = now.getHours();
-    let greeting = '';
-
-    if (hour >= 5 && hour < 12) {
-      greeting = 'Good morning';
-    } else if (hour >= 12 && hour < 18) {
-      greeting = 'Good afternoon';
-    } else {
-      greeting = 'Good evening';
-    }
-    return `${greeting}`
-  }
-
-  const user = JSON.parse(localStorage.getItem('user'))
-  
-  return (
-    <>
-      <Title>{`${greetings()}, ${user?.username}`}</Title>
-      <Typography component="p" variant="h4">
-        {
-          isLoading && <Skeleton width={50} height={50} /> ||
-          data?.data?.requests?.length || 0
-        }
-      </Typography>
-      <Typography color="text.secondary" sx={{ flex: 1 }}>
-        Request(s) Awaiting Authorization
-      </Typography>
-    </>
-  )
 }

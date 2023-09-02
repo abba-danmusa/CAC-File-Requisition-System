@@ -16,7 +16,6 @@ import { styled } from '@mui/system'
 import Theme from './Theme'
 
 function Managing() {
-  const [remarks, setRemarks] = useState('')
 
   const {
     isLoading, 
@@ -28,12 +27,14 @@ function Managing() {
 
   const [openBackdrop, setOpenBackdrop] = useState(false)
   const [authorize, setAuthorize] = useState('')
+  const [remarks, setRemarks] = useState('')
+  const [id, setId] = useState('')
 
   const { mutate, isSuccess: isAuthSuccess, data: authData, isError: isAuthError, error: authError } = useSendFile()
   
   const authorizeRequest = e => {
     let data = {
-      id: e.target.dataset.id,
+      id,
       status: e.target.dataset.status,
       remarks
     }
@@ -70,7 +71,6 @@ function Managing() {
             message={'send file'}
             openBackdrop={openBackdrop}
             status={'accepted'}
-            id={data?.data?.request?.[0]?._id}
             setOpenBackdrop={setOpenBackdrop}
             authorizeRequest={authorizeRequest}
             remarks={remarks}
@@ -118,6 +118,7 @@ function Managing() {
               initialOpenState={true}
               setAuthorize={setAuthorize}
               setOpenBackdrop={setOpenBackdrop}
+              setId={setId}
             />
           }
         </TableBody>
@@ -178,7 +179,6 @@ const Modal = ({ openBackdrop, status, authorizeRequest, id, setOpenBackdrop, re
                 placeholder='Remarks? (optional)'
                 minRows={3}
                 margin="normal"
-                fullWidth
                 id="remarks"
                 label="Remarks"
                 name="remarks"

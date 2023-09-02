@@ -25,13 +25,13 @@ export const mainListItems = (
       <ListItemIcon>
         <PendingIcon/>
       </ListItemIcon>
-      <ListItemText primary="Pending Authorization" />
+      <ListItemText primary="Awaiting Authorization" />
     </ListItemButton>
     <ListItemButton>
       <ListItemIcon>
         <RuleIcon/>
       </ListItemIcon>
-      <ListItemText primary="Pending Approvals" />
+      <ListItemText primary="Awaiting Approval" />
     </ListItemButton>
     <ListItemButton>
       <ListItemIcon>

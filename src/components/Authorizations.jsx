@@ -10,10 +10,10 @@ import { contrastText, primaryColor, secondaryColor } from '../utils/colors';
 import Skeleton from '@mui/material/Skeleton';
 import Row from './Row';
 import Alert from './Alert'
-import { Backdrop, Box, Slide, Typography, TextareaAutosize } from '@mui/material';
+import { Backdrop, Box, Slide,TextareaAutosize } from '@mui/material';
 import { styled } from '@mui/system';
-import { useState } from 'react'
 import { useAuthorizeRequest } from '../hooks/useRequest'
+import { useState } from 'react'
 import Theme from './Theme'
 
 function Authorizations() {
@@ -29,12 +29,13 @@ function Authorizations() {
   const [openBackdrop, setOpenBackdrop] = useState(false)
   const [authorize, setAuthorize] = useState('')
   const [remarks, setRemarks] = useState('')
+  const [id, setId] = useState('')
 
   const { mutate, isSuccess: isAuthSuccess, data: authData, isError: isAuthError, error: authError } = useAuthorizeRequest()
   
   const authorizeRequest = e => {
     let data = {
-      id: e.target.dataset.id,
+      id,
       status: e.target.dataset.status,
       remarks
     }
@@ -71,7 +72,6 @@ function Authorizations() {
             message={'authorize'}
             openBackdrop={openBackdrop}
             status={'accepted'}
-            id={data?.data?.requests?.[0]?._id}
             setOpenBackdrop={setOpenBackdrop}
             authorizeRequest={authorizeRequest}
             remarks={remarks}
@@ -83,7 +83,6 @@ function Authorizations() {
             message={'reject'}
             openBackdrop={openBackdrop}
             status={'rejected'}
-            id={data?.data?.requests?.[0]?._id}
             setOpenBackdrop={setOpenBackdrop}
             authorizeRequest={authorizeRequest}
             remarks={remarks}
@@ -131,6 +130,7 @@ function Authorizations() {
               initialOpenState={true}
               setAuthorize={setAuthorize}
               setOpenBackdrop={setOpenBackdrop}
+              setId={setId}
             />
           }
         </TableBody>
@@ -139,34 +139,6 @@ function Authorizations() {
         alignSelf={'center'}
         display={error?.response?.status == 404 || isLoading ? 'none' : ''}
       >
-        {/* <Button
-          sx={{
-            width: 100,
-            alignSelf: 'center',
-            backgroundColor: primaryColor,
-            ":hover": { backgroundColor: secondaryColor },
-            color: contrastText,
-            margin: 2,
-            // marginTop: 2
-          }}
-          onClick={authorizeRequest}
-        >
-          Authorize
-        </Button>
-        <Button
-          sx={{
-            width: 100,
-            alignSelf: 'center',
-            backgroundColor: 'brown',
-            ":hover": { backgroundColor: 'red' },
-            color: contrastText,
-            margin: 2,
-            // marginTop: 2
-          }}
-          onClick={authorizeRequest}
-        >
-          Reject
-        </Button> */}
       </Grid>
     </>
   )
@@ -190,7 +162,7 @@ const StyledTextarea = styled(TextareaAutosize)(
 )
 
 // eslint-disable-next-line react/prop-types
-const Modal = ({ openBackdrop, message, status, authorizeRequest, id, setOpenBackdrop, remarks, setRemarks}) => {
+const Modal = ({ openBackdrop, message, status, authorizeRequest, setOpenBackdrop, remarks, setRemarks}) => {
   
   return (
     <Slide direction="left" in={openBackdrop} mountOnEnter unmountOnExit>
@@ -219,7 +191,6 @@ const Modal = ({ openBackdrop, message, status, authorizeRequest, id, setOpenBac
               placeholder='Remarks? (optional)'
               minRows={3}
               margin="normal"
-              fullWidth
               id="remarks"
               label="Remarks"
               name="remarks"
@@ -239,7 +210,6 @@ const Modal = ({ openBackdrop, message, status, authorizeRequest, id, setOpenBac
                 margin: 2,
                 fontSize: '10px'
               }}
-              data-id={id}
               data-status={status}
               onClick={authorizeRequest}
             >

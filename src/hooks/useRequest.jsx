@@ -234,24 +234,122 @@ export const useConfirmReceipt = () => {
     },
     onMutate: async (newRequest) => {
       await queryClient.cancelQueries(['latest-request'])
-      await queryClient.cancelQueries(['authorization-request'])
-      const previousRequest = queryClient.getQueryData(['authorization-request'])
+      await queryClient.cancelQueries(['requests'])
+      const previousLatestRequest = queryClient.getQueryData(['latest-request'])
+      const previousRequests = queryClient.getQueryData(['requests'])
 
       queryClient.setQueryData(['latest-request'], (oldQueryData) => {
-        if (!previousRequest) return null
+        if (!previousLatestRequest) return null
+        return {
+          ...oldQueryData,
+          data: [...oldQueryData.data.request, newRequest]
+        }
+      })
+
+      queryClient.setQueryData(['requests'], (oldQueryData) => {
+        if (!previousRequests) return null
         return {
           ...oldQueryData,
           data: [...oldQueryData.data.requests, newRequest]
         }
       })
-      return { previousRequest }
+      return { previousRequests, previousLatestRequest }
     },
     onError: (_error, _request, context) => {
-      queryClient.setQueryData(['authorization-request'], context.previousRequest)
+      queryClient.setQueryData(['latest-request'], context.previousLatestRequest)
+      queryClient.setQueryData(['requests'], context.previousRequests)
     },
     onSettled: () => {
       queryClient.invalidateQueries(['latest-request'])
-      queryClient.invalidateQueries(['authorization-request'])
+      queryClient.invalidateQueries(['requests'])
     }
+  })
+}
+
+export const useAwaitAuthorization = () => {
+  return useQuery({
+    queryKey: ['await-authorization'],
+    queryFn: async () => {
+      return axios.get('/authorization/requests/pending')
+    },
+    retry: 1,
+    refetchOnMount: true
+  })
+}
+
+export const useAwaitApproval = () => {
+  return useQuery({
+    queryKey: ['await-approval'],
+    queryFn: async () => {
+      return axios.get('/approval/requests/pending')
+    },
+    retry: 1,
+    refetchOnMount: true
+  })
+}
+
+export const useAuthorizedRequests = () => {
+  return useQuery({
+    queryKey: ['authorized-requests'],
+    queryFn: async () => {
+      return axios.get('/authorization/request/accepted')
+    },
+    retry: 1,
+    refetchOnMount: true
+  })
+}
+
+export const useApprovedRequests = () => {
+  return useQuery({
+    queryKey: ['approved-requests'],
+    queryFn: async () => {
+      return axios.get('/approval/request/accepted')
+    },
+    retry: 1,
+    refetchOnMount: true
+  })
+}
+
+export const useFilesReceived = () => {
+  return useQuery({
+    queryKey: ['authorized-requests'],
+    queryFn: async () => {
+      return axios.get('/receive/request/accepted')
+    },
+    retry: 1,
+    refetchOnMount: true
+  })
+}
+
+export const useAcceptedAuthorizationRequests = () => {
+  return useQuery({
+    queryKey: ['accepted-authorization-requests'],
+    queryFn: async () => {
+      return axios.get('/authorization/department/accepted/request')
+    },
+    retry: 1,
+    refetchOnMount: true
+  })
+}
+
+export const useDeclinedAuthorizationRequests = () => {
+  return useQuery({
+    queryKey: ['declined-authorization-requests'],
+    queryFn: async () => {
+      return axios.get('/authorization/department/declined/request')
+    },
+    retry: 1,
+    refetchOnMount: true
+  })
+}
+
+export const useAllAuthorizationRequests = () => {
+  return useQuery({
+    queryKey: ['all-authorization-requests'],
+    queryFn: async () => {
+      return axios.get('/authorization/department/request')
+    },
+    retry: 1,
+    refetchOnMount: true
   })
 }

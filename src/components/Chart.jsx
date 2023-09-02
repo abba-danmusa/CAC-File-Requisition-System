@@ -91,7 +91,7 @@ export default function HorizontalLinearAlternativeLabelStepper() {
                     </Typography>
                   );
 
-                  if (index === 3 && data?.data?.request?.[0].fileReceive.status === 'Awaiting File')
+                  if (index === 3 && data?.data?.request?.[0].fileRelease.status === 'File Released' && data?.data?.request?.[0].fileReceive.status === 'Awaiting File')
                     return (
                       <LightTooltip
                         title={<ReceiptConfirmation request={data?.data?.request?.[0] } />}

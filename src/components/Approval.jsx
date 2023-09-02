@@ -30,12 +30,13 @@ function Approval() {
 
   const [openBackdrop, setOpenBackdrop] = useState(false)
   const [authorize, setAuthorize] = useState('')
+  const [id, setId] = useState('')
 
   const { mutate, isSuccess: isAuthSuccess, data: authData, isError: isAuthError, error: authError } = useApproveRequest()
   
   const authorizeRequest = e => {
     let data = {
-      id: e.target.dataset.id,
+      id,
       status: e.target.dataset.status,
       remarks: remarks
     }
@@ -72,7 +73,6 @@ function Approval() {
             message={'approve'}
             openBackdrop={openBackdrop}
             status={'accepted'}
-            id={data?.data?.request?.[0]?._id}
             setOpenBackdrop={setOpenBackdrop}
             authorizeRequest={authorizeRequest}
             remarks={remarks}
@@ -84,7 +84,6 @@ function Approval() {
             message={'disapprove'}
             openBackdrop={openBackdrop}
             status={'rejected'}
-            id={data?.data?.request?.[0]?._id}
             setOpenBackdrop={setOpenBackdrop}
             authorizeRequest={authorizeRequest}
             remarks={remarks}
@@ -132,43 +131,11 @@ function Approval() {
               initialOpenState={true}
               setAuthorize={setAuthorize}
               setOpenBackdrop={setOpenBackdrop}
+              setId={setId}
             />
           }
         </TableBody>
       </Table>
-      <Grid
-        alignSelf={'center'}
-        display={error?.response?.status == 404 || isLoading ? 'none' : ''}
-      >
-        {/* <Button
-          sx={{
-            width: 100,
-            alignSelf: 'center',
-            backgroundColor: primaryColor,
-            ":hover": { backgroundColor: secondaryColor },
-            color: contrastText,
-            margin: 2,
-            // marginTop: 2
-          }}
-          onClick={authorizeRequest}
-        >
-          Authorize
-        </Button>
-        <Button
-          sx={{
-            width: 100,
-            alignSelf: 'center',
-            backgroundColor: 'brown',
-            ":hover": { backgroundColor: 'red' },
-            color: contrastText,
-            margin: 2,
-            // marginTop: 2
-          }}
-          onClick={authorizeRequest}
-        >
-          Reject
-        </Button> */}
-      </Grid>
     </>
   )
 }
@@ -191,7 +158,7 @@ const StyledTextarea = styled(TextareaAutosize)(
 )
 
 // eslint-disable-next-line react/prop-types
-const Modal = ({ openBackdrop, message, status, authorizeRequest, id, setOpenBackdrop, remarks, setRemarks}) => {
+const Modal = ({ openBackdrop, message, status, authorizeRequest, setOpenBackdrop, remarks, setRemarks}) => {
   
   return (
     <Slide direction="left" in={openBackdrop} mountOnEnter unmountOnExit>
@@ -240,7 +207,6 @@ const Modal = ({ openBackdrop, message, status, authorizeRequest, id, setOpenBac
                 margin: 2,
                 fontSize: '10px'
               }}
-              data-id={id}
               data-status={status}
               onClick={authorizeRequest}
             >
