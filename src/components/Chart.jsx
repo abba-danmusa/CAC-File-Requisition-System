@@ -52,6 +52,11 @@ export default function HorizontalLinearAlternativeLabelStepper() {
       date: data?.data?.request?.[0]?.fileReceive.date,
       remarks: data?.data?.request?.[0]?.fileReceive.remarks
     },
+    {
+      label: data?.data?.request?.[0]?.fileReceive.status,
+      date: data?.data?.request?.[0]?.fileReceive.date,
+      remarks: data?.data?.request?.[0]?.fileReceive.remarks
+    },
   ]
 
   return (

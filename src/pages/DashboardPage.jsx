@@ -193,8 +193,8 @@ export default function Dashboard() {
             backgroundColor: (theme) =>
               theme.palette.mode === 'light'
                 ?
-                theme.palette.grey[100]
-                // 'transparent'
+                // theme.palette.grey[100]
+                'transparent'
                 : theme.palette.grey[900],
             flexGrow: 1,
             height: '100vh',

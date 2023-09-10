@@ -13,11 +13,14 @@ import Alert from './Alert'
 import Theme from './Theme'
 import { styled } from '@mui/system';
 import { useState } from 'react'
+import {useManageAccountSearch} from '../hooks/useSearch'
+import SearchItem from './SearchItem'
+import useDebounceValue from '../hooks/useDebounceValue'
 import { primaryColor, secondaryColor, contrastText} from '../utils/colors';
 
 function PendingFileRelease() {
   
-  const { isError, error, isSuccess, data, isLoading } = usePendingReleases()
+  const { isError, error, isSuccess, data, isLoading }  = usePendingReleases()
 
   const { mutate, isSuccess: isAuthSuccess, data: authData, isError: isAuthError, error: authError } = useSendFile()
   
@@ -27,7 +30,7 @@ function PendingFileRelease() {
   const [authorize, setAuthorize] = useState('')
   const [remarks, setRemarks] = useState('')
   const [id, setId] = useState('')
-
+  
   const authorizeRequest = e => {
     let data = {
       status: e.target.dataset.status,
@@ -35,8 +38,27 @@ function PendingFileRelease() {
       remarks
     }
     mutate(data)
+    refetch()
     setOpenBackdrop(false)
     setAuthorize('')
+  }
+
+  const [searchQuery, setSearchQuery] = useState('')
+  const debouncedValue = useDebounceValue(searchQuery)
+
+  const {
+    data: searchData,
+    error: searchError,
+    isSuccess: isSearchSuccess,
+    isError: isSearchError,
+    refetch,
+  } = useManageAccountSearch(debouncedValue)
+  
+  const search = (e) => {
+    const value = e.target.value
+    if (!value) return setSearchQuery('')
+    setSearchQuery(value)
+    refetch()
   }
 
   return (
@@ -62,6 +84,16 @@ function PendingFileRelease() {
         )
       }
       {
+        isSearchError && (
+          <Alert severity={'error'}
+            message={
+              searchData?.response?.data?.message ||
+              searchError?.message
+            }
+          />
+        )
+      }
+      {
         authorize === 'RELEASE' && openBackdrop && (
           <Modal
             message={'send file'}
@@ -76,6 +108,9 @@ function PendingFileRelease() {
       }
 
       <Title>New Requests</Title>
+      <Box sx={{display: 'flex', flexDirection: 'row', marginTop: 2}}>
+        <SearchItem search={search} />
+      </Box>
       {
         isError && (
           <Typography color="text.secondary" sx={{ flex: 1 }} align='center'>
@@ -108,6 +143,21 @@ function PendingFileRelease() {
                   <TableCell><Skeleton height={25}/></TableCell>
                 </TableRow>
               )
+            )
+          }
+          {
+            isSearchSuccess && (
+              searchData?.data?.requests.map(request => (
+                <Row
+                  key={request?._id}
+                  row={request}
+                  initialOpenState={false}
+                  setAuthorize={setAuthorize}
+                  setOpenBackdrop={setOpenBackdrop}
+                  setId={setId}
+                  isSearchData
+                />
+              ))
             )
           }
           {
@@ -151,7 +201,7 @@ const StyledTextarea = styled(TextareaAutosize)(
 )
 
 // eslint-disable-next-line react/prop-types
-const Modal = ({ openBackdrop, status, authorizeRequest, id, setOpenBackdrop, remarks, setRemarks}) => {
+const Modal = ({ openBackdrop, status, authorizeRequest, setOpenBackdrop, remarks, setRemarks}) => {
   
   return (
     <Slide direction="left" in={openBackdrop} mountOnEnter unmountOnExit>

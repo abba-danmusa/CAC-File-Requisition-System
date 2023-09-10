@@ -8,12 +8,15 @@ import Title from '../components/Title';
 import { Skeleton, Typography } from '@mui/material';
 import { useApproveRequest, usePendingApprovals } from '../hooks/useRequest';
 import Row from './Row';
-import { Backdrop, Box, Slide,TextareaAutosize, Button } from '@mui/material';
+import { Backdrop, Box, Slide, TextareaAutosize, Button } from '@mui/material';
 import Alert from './Alert'
 import Theme from './Theme'
 import { styled } from '@mui/system';
 import { useState } from 'react'
-import { primaryColor, secondaryColor, contrastText} from '../utils/colors';
+import {useApprovalAccountSearch} from '../hooks/useSearch'
+import SearchItem from './SearchItem'
+import useDebounceValue from '../hooks/useDebounceValue'
+import { primaryColor, secondaryColor, contrastText} from '../utils/colors'
 
 function PendingApprovals() {
   
@@ -33,8 +36,27 @@ function PendingApprovals() {
       remarks
     }
     mutate(data)
+    refetch()
     setOpenBackdrop(false)
     setAuthorize('')
+  }
+
+  const [searchQuery, setSearchQuery] = useState('')
+  const debouncedValue = useDebounceValue(searchQuery)
+
+  const {
+    data: searchData,
+    error: searchError,
+    isSuccess: isSearchSuccess,
+    isError: isSearchError,
+    refetch,
+  } = useApprovalAccountSearch(debouncedValue)
+  
+  const search = (e) => {
+    const value = e.target.value
+    if (!value) return setSearchQuery('')
+    setSearchQuery(value)
+    refetch()
   }
 
   return (
@@ -59,7 +81,16 @@ function PendingApprovals() {
           />
         )
       }
-
+      {
+        isSearchError && (
+          <Alert severity={'error'}
+            message={
+              searchData?.response?.data?.message ||
+              searchError?.message
+            }
+          />
+        )
+      }
       {
         authorize === 'APPROVE' && openBackdrop && (
           <Modal
@@ -88,6 +119,9 @@ function PendingApprovals() {
       }
 
       <Title>Recent Requests</Title>
+      <Box sx={{display: 'flex', flexDirection: 'row', marginTop: 2}}>
+        <SearchItem search={search} />
+      </Box>
       {
         isError && (
           <Typography color="text.secondary" sx={{ flex: 1 }} align='center'>
@@ -120,6 +154,21 @@ function PendingApprovals() {
                   <TableCell><Skeleton height={25}/></TableCell>
                 </TableRow>
               )
+            )
+          }
+          {
+            isSearchSuccess && (
+              searchData?.data?.requests.map(request => (
+                <Row
+                  key={request?._id}
+                  row={request}
+                  initialOpenState={false}
+                  setAuthorize={setAuthorize}
+                  setOpenBackdrop={setOpenBackdrop}
+                  setId={setId}
+                  isSearchData
+                />
+              ))
             )
           }
           {

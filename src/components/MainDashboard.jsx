@@ -11,7 +11,7 @@ import PendingApprovals from '../components/PendingApprovals';
 import Managing from '../components/Managing';
 import PendingFileRelease from '../components/PendingFileRelease';
 import Copyright from './CopyRight';
-import { useGetPendingAuthRequests, usePendingApprovalCount, usePendingReleaseCount } from '../hooks/useRequest'
+import { usePendingApprovalCount, usePendingAuthCounts, usePendingReleaseCount } from '../hooks/useRequest'
 import Skeleton from '@mui/material/Skeleton';
 import Title from '../components/Title';
 import { Typography } from '@mui/material';
@@ -170,7 +170,7 @@ const AwaitingFileRelease = () => {
 
 const AwaitingAuthorization = () => {
   
-  const { isLoading, data } = useGetPendingAuthRequests()
+  const { isLoading, data } = usePendingAuthCounts()
 
   const greetings = () => {
     const now = new Date();
@@ -195,7 +195,7 @@ const AwaitingAuthorization = () => {
       <Typography component="p" variant="h4">
         {
           isLoading && <Skeleton width={50} height={50} /> ||
-          data?.data?.requests?.length || 0
+          data?.data?.requests[0].count
         }
       </Typography>
       <Typography color="text.secondary" sx={{ flex: 1 }}>

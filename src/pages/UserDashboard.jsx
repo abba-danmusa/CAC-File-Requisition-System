@@ -1,7 +1,9 @@
+import { useState } from "react"
 import MainDashboard from "../components/MainDashboard"
 import Requests from "../components/Menu/Requests"
-import { useAwaitAuthorization, useAwaitApproval, useAuthorizedRequests, useApprovedRequests, useFilesReceived, useAcceptedAuthorizationRequests, useDeclinedAuthorizationRequests, useAllAuthorizationRequests } from "../hooks/useRequest"
+import { useAwaitAuthorization, useAwaitApproval, useAuthorizedRequests, useApprovedRequests, useFilesReceived, useAcceptedAuthorizationRequests, useDeclinedAuthorizationRequests, useAllAuthorizationRequests, useAcceptedApprovalRequests, useRejectedApprovalRequests, useApprovalRequests, useReleasedFiles, useReleaseFiles } from "../hooks/useRequest"
 import { useTab } from "../hooks/useTab"
+import FileRelease from "../components/FileRelease"
 
 // eslint-disable-next-line react/prop-types
 function UserDashboard() {
@@ -19,10 +21,18 @@ function UserDashboard() {
     'Approved Requests': <ApprovedRequests />,
     'Files Received': <FilesReceived />,
     'Files Returned': <FilesReturned />,
-    //Authorization Account
+    // Authorization Account
     'Accepted Requests': <AcceptedRequests />,
     'Declined Requests': <DeclinedRequests />,
-    'All Requests': <AllRequests/>
+    'All Requests': <AllRequests />,
+    // Approval Account
+    'Approved Request(s)': <AllApprovedRequests />,
+    'Declined Request(s)': <DisapprovedRequests />,
+    'All Request(s)': <AllApprovalRequests />,
+    // File Release
+    'Released Files': <ReleasedFiles />,
+    'Returned Files': <ReturnedFiles />,
+    'Recent Requests': <RecentRequests/>
   }[currentTab]
 
   return (
@@ -60,43 +70,105 @@ function AwaitingApproval() {
 }
 
 function AuthorizedRequests() {
-  const { isLoading, isSuccess, data, isError, error } = useAuthorizedRequests()
+  
+  const [page, setPage] = useState(1)
+
+  const {                                 
+    isLoading,
+    isRefetching,
+    isRefetchError,
+    isSuccess,
+    data, 
+    isError, 
+    error, 
+    refetch
+  } = useAuthorizedRequests(page)
+  
+  const changePage = (e, page) => {
+    setPage(page) 
+    refetch()
+  }
 
   return (
     <Requests
       isLoading={isLoading}
       isSuccess={isSuccess}
       data={data}
+      page={page}
       isError={isError}
       error={error}
+      isRefetching={isRefetching}
+      isRefetchError={isRefetchError}
+      changePage={changePage}
     />
   )
 }
 
 function ApprovedRequests() {
-  const { isLoading, isSuccess, data, isError, error } = useApprovedRequests()
+  
+  const [page, setPage] = useState(1)
+  
+  const {                                 
+    isLoading,
+    isRefetching,
+    isRefetchError,
+    isSuccess,
+    data, 
+    isError, 
+    error, 
+    refetch
+  } = useApprovedRequests(page)
+
+  const changePage = (e, page) => {
+    setPage(page) 
+    refetch()
+  }
 
   return (
     <Requests
       isLoading={isLoading}
       isSuccess={isSuccess}
       data={data}
+      page={page}
       isError={isError}
       error={error}
+      isRefetching={isRefetching}
+      isRefetchError={isRefetchError}
+      changePage={changePage}
     />
   )
 }
 
 function FilesReceived() {
-  const { isLoading, isSuccess, data, isError, error } = useFilesReceived()
+  const [page, setPage] = useState(1)
+  
+  const {                                 
+    isLoading,
+    isRefetching,
+    isRefetchError,
+    isSuccess,
+    data, 
+    isError, 
+    error, 
+    refetch
+  } = useFilesReceived(page)
+
+  const changePage = (e, page) => {
+    setPage(page) 
+    refetch()
+  }
 
   return (
     <Requests
       isLoading={isLoading}
       isSuccess={isSuccess}
       data={data}
+      page={page}
       isError={isError}
       error={error}
+      isRefetching={isRefetching}
+      isRefetchError={isRefetchError}
+      changePage={changePage}
     />
   )
 }
@@ -157,7 +229,131 @@ function AllRequests() {
     data,
     error
   } = useAllAuthorizationRequests()
-  
+
+  return (
+    <Requests
+      isLoading={isLoading}
+      isSuccess={isSuccess}
+      isError={isError}
+      data={data}
+      error={error}
+    />
+  )
+}
+
+function AllApprovedRequests() {
+  const {
+    isLoading,
+    isSuccess,
+    isError,
+    data,
+    error
+  } = useAcceptedApprovalRequests()
+
+  return (
+    <Requests
+      isLoading={isLoading}
+      isSuccess={isSuccess}
+      isError={isError}
+      data={data}
+      error={error}
+    />
+  )
+}
+
+function DisapprovedRequests() {
+  const {
+    isLoading,
+    isSuccess,
+    isError,
+    data,
+    error
+  } = useRejectedApprovalRequests()
+
+  return (
+    <Requests
+      isLoading={isLoading}
+      isSuccess={isSuccess}
+      isError={isError}
+      data={data}
+      error={error}
+    />
+  )
+}
+
+function AllApprovalRequests() {
+  const {
+    isLoading,
+    isSuccess,
+    isError,
+    data,
+    error
+  } = useApprovalRequests()
+
+  return (
+    <Requests
+      isLoading={isLoading}
+      isSuccess={isSuccess}
+      isError={isError}
+      data={data}
+      error={error}
+    />
+  )
+}
+
+function ReleasedFiles() {
+  const {
+    isLoading,
+    isSuccess,
+    isError,
+    data,
+    error,
+    refetch
+  } = useReleasedFiles()
+
+  return (
+    <FileRelease
+      isLoading={isLoading}
+      isSuccess={isSuccess}
+      isError={isError}
+      data={data}
+      error={error}
+      refetch={refetch}
+    />
+  )
+}
+
+function ReturnedFiles() {
+  const {
+    isLoading,
+    isSuccess,
+    isError,
+    data,
+    error,
+    refetch
+  } = useReleasedFiles()
+
+  return (
+    <FileRelease
+      isLoading={isLoading}
+      isSuccess={isSuccess}
+      isError={isError}
+      data={data}
+      error={error}
+      refetch={refetch}
+    />
+  )
+}
+
+function RecentRequests() {
+  const {
+    isLoading,
+    isSuccess,
+    isError,
+    data,
+    error
+  } = useReleaseFiles()
+
   return (
     <Requests
       isLoading={isLoading}

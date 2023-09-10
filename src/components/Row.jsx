@@ -14,16 +14,17 @@ import TableRow from '@mui/material/TableRow';
 import {Button, Grid} from '@mui/material';
 import { primaryColor, secondaryColor, contrastText } from '../utils/colors';
 import Title from './Title';
+import CountdownTimer from './Timer';
 
 // eslint-disable-next-line react/prop-types
-function Row({ row, initialOpenState, setAuthorize, setOpenBackdrop, setId}) {
+function Row({ row, initialOpenState, setAuthorize, setOpenBackdrop, setId, isSearchData}) {
   
   const [open, setOpen] = useState(initialOpenState)
   const user = JSON.parse(localStorage.getItem('user'))
 
   return (
     <>
-      <TableRow key={row?._id}>
+      <TableRow key={row?._id} sx={isSearchData ? {border: `1px ridge ${secondaryColor}`} : {}}>
         <TableCell>
           <IconButton
             aria-label="expand row"
@@ -232,7 +233,14 @@ const Approval = ({ row, setOpenBackdrop, setAuthorize, user, setId}) => {
 const FileRelease = ({ row, setOpenBackdrop, setAuthorize, user, setId }) => {
   return (
     row?.requestStatus.fileRelease.status === 'pending' && (
-      <>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}
+      >
         <Button
           sx={{
             width: 100,
@@ -251,8 +259,8 @@ const FileRelease = ({ row, setOpenBackdrop, setAuthorize, user, setId }) => {
         >
           Send File
         </Button>
-        
-      </>
+        <DisplayTimer request={row.requestStatus.fileRelease}/>
+      </Box>
     ) || (
       <Grid container spacing={2} alignItems='center'>
         <Grid item>
@@ -282,9 +290,43 @@ const FileRelease = ({ row, setOpenBackdrop, setAuthorize, user, setId }) => {
                 row?.approvedBy?.name}
           </Typography>
         </Grid>
+        <Grid item>
+          {
+            !(row?.requestStatus.fileRelease.timeElapse?.elapsed) && (
+              <h1>
+                {
+                  (((new Date(row?.requestStatus.fileRelease.timeElapse?.time)) -
+                  (new Date(row?.requestStatus.fileRelease.dateReceived))) /
+                  (1000 * 60)).toFixed(2)
+                }
+              </h1>
+            )
+          }
+        </Grid>
       </Grid>
     )
   )
+}
+
+// eslint-disable-next-line react/prop-types
+function DisplayTimer({ request }) {
+  if (Date.now() <= new Date(request?.timeElapse?.time)){
+    return <CountdownTimer
+      targetTime={new Date(request?.timeElapse?.time)}
+    />
+  } else if (!(request?.timeElapse?.elapsed)) {
+    return (
+      <h1>
+        {
+          ((new Date(request?.timeElapse?.time)) -
+          (new Date(request?.dateReceived))) /
+          (1000 * 60)
+        }
+      </h1>
+    )
+  } else {
+    return <h1 style={{color: 'red'}}>00:00</h1>
+  }
 }
 
 export default Row

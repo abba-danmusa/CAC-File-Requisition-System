@@ -1,5 +1,4 @@
 import {useState} from 'react';
-import Link from '@mui/material/Link';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -10,15 +9,10 @@ import moment from 'moment'
 import { Box, Collapse, IconButton, Skeleton, Typography, Backdrop, CircularProgress, Button, Container, Grid, Paper} from '@mui/material'
 import Tooltip, { tooltipClasses } from '@mui/material/Tooltip'
 import Alert from '../Alert'
-// import { primaryColor, contrastText, secondaryColor } from '../utils/colors';
-
-function preventDefault(event) {
-  event.preventDefault();
-}
 
 // eslint-disable-next-line react/prop-types
-export default function Requests({isError, error, isLoading, isSuccess, data}) {
-  // eslint-disable-next-line react/prop-types
+export default function Requests({isError, error, isLoading, isSuccess, data, isRefetching, isRefetchError, page, changePage}) {
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Grid container spacing={3}>
@@ -26,12 +20,17 @@ export default function Requests({isError, error, isLoading, isSuccess, data}) {
           <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
             <Title>Requests</Title>
             {
-              isError && (
+              isError || isRefetchError && (
                 <Typography color="text.secondary" sx={{ flex: 1 }} align='center'>
                   {error.response?.data?.message || error?.message}
                 </Typography>
               )
             }
+            <PaginationItem
+              page={page}
+              pages={data?.data?.pages}
+              changePage={changePage}
+            />
             <Table size="small">
               <TableHead>
                 <TableRow>
@@ -46,7 +45,7 @@ export default function Requests({isError, error, isLoading, isSuccess, data}) {
               <TableBody>
                 {/* eslint-disable-next-line react/prop-types */}
                 {
-                  isLoading && (
+                  isLoading || isRefetching && (
                     skeletonRows.map(num => 
                       <TableRow key={num}>
                         <TableCell><Skeleton height={25}/></TableCell>
@@ -68,9 +67,6 @@ export default function Requests({isError, error, isLoading, isSuccess, data}) {
                 }
               </TableBody>
             </Table>
-            <Link color="primary" href="#" onClick={preventDefault} sx={{ mt: 3 }}>
-              See more requests
-            </Link>
           </Paper>
         </Grid>
       </Grid>
@@ -131,6 +127,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import Zoom from '@mui/material/Zoom'
+import PaginationItem from '../Pagination';
 
 const LightTooltip = styled(({ className, ...props }) => (
   <Tooltip {...props} classes={{ popper: className }} />

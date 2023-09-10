@@ -32,11 +32,11 @@ export const useSendRequest = () => {
   })
 }
 
-export const useGetRequests = () => {
+export const useGetRequests = (page) => {
   return useQuery({
-    queryKey: ["requests"],
+    queryKey: ["requests", page],
     queryFn: async () => {
-      return axios.get("/requests");
+      return axios.get(`/requests/${page}`)
     },
     // refetchInterval: 1000,
     // refetchOnMount: true
@@ -48,6 +48,16 @@ export const useGetPendingAuthRequests = () => {
     queryKey: ['pending-authorization'],
     queryFn: async () => {
       return axios.get('/authorization/request/pending')
+    },
+    retry: 1
+  })
+}
+
+export const usePendingAuthCounts = () => {
+  return useQuery({
+    queryKey: ['pending-authorization-count'],
+    queryFn: async () => {
+      return axios.get('/authorization/request/pending/count')
     },
     retry: 1
   })
@@ -288,33 +298,33 @@ export const useAwaitApproval = () => {
   })
 }
 
-export const useAuthorizedRequests = () => {
+export const useAuthorizedRequests = (page) => {
   return useQuery({
-    queryKey: ['authorized-requests'],
+    queryKey: ['authorized-requests', page],
     queryFn: async () => {
-      return axios.get('/authorization/request/accepted')
+      return axios.get(`/authorization/request/accepted/${page}`)
     },
     retry: 1,
     refetchOnMount: true
   })
 }
 
-export const useApprovedRequests = () => {
+export const useApprovedRequests = (page) => {
   return useQuery({
-    queryKey: ['approved-requests'],
+    queryKey: ['approved-requests', page],
     queryFn: async () => {
-      return axios.get('/approval/request/accepted')
+      return axios.get(`/approval/request/accepted/${page}`)
     },
     retry: 1,
     refetchOnMount: true
   })
 }
 
-export const useFilesReceived = () => {
+export const useFilesReceived = (page) => {
   return useQuery({
-    queryKey: ['authorized-requests'],
+    queryKey: ['authorized-requests', page],
     queryFn: async () => {
-      return axios.get('/receive/request/accepted')
+      return axios.get(`/receive/request/accepted/${page}`)
     },
     retry: 1,
     refetchOnMount: true
@@ -348,6 +358,61 @@ export const useAllAuthorizationRequests = () => {
     queryKey: ['all-authorization-requests'],
     queryFn: async () => {
       return axios.get('/authorization/department/request')
+    },
+    retry: 1,
+    refetchOnMount: true
+  })
+}
+
+export const useAcceptedApprovalRequests = () => {
+  return useQuery({
+    queryKey: ['accepted-approval-requests'],
+    queryFn: async () => {
+      return axios.get('/approval/account/approved/request')
+    },
+    retry: 1,
+    refetchOnMount: true
+  })
+}
+
+export const useRejectedApprovalRequests = () => {
+  return useQuery({
+    queryKey: ['rejected-approval-requests'],
+    queryFn: async () => {
+      return axios.get('/approval/account/disapproved/request')
+    },
+    retry: 1,
+    refetchOnMount: true
+  })
+}
+
+export const useApprovalRequests = () => {
+  return useQuery({
+    queryKey: ['all-approval-requests'],
+    queryFn: async () => {
+      return axios.get('/approval/account/request')
+    },
+    retry: 1,
+    refetchOnMount: true
+  })
+}
+
+export const useReleasedFiles = () => {
+  return useQuery({
+    queryKey: ['released-files'],
+    queryFn: async () => {
+      return axios.get('/release/section/release/request')
+    },
+    retry: 1,
+    refetchOnMount: true
+  })
+}
+
+export const useReleaseFiles = () => {
+  return useQuery({
+    queryKey: ['release-files'],
+    queryFn: async () => {
+      return axios.get('/release/section/request')
     },
     retry: 1,
     refetchOnMount: true

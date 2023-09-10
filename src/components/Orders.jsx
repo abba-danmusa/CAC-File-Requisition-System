@@ -1,5 +1,4 @@
-import {useState} from 'react';
-import Link from '@mui/material/Link';
+import {useEffect, useState} from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -11,27 +10,75 @@ import { Box, Collapse, IconButton, Skeleton, Typography, Backdrop, CircularProg
 import { useConfirmReceipt, useGetRequests } from '../hooks/useRequest'
 import Tooltip, { tooltipClasses } from '@mui/material/Tooltip'
 import Alert from './Alert'
-import { primaryColor, contrastText, secondaryColor } from '../utils/colors';
-
-function preventDefault(event) {
-  event.preventDefault();
-}
+import { styled} from '@mui/material/styles'
+import axios from "../utils/axios"
+import { primaryColor, contrastText, secondaryColor } from '../utils/colors'
 
 // eslint-disable-next-line react/prop-types
 export default function Orders() {
   // eslint-disable-next-line react/prop-types
-  const { isLoading, isSuccess, data, isError, error } = useGetRequests()
+  const [page, setPage] = useState(1)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchData, setSearchData] = useState([])
+  const [searchError, setSearchError] = useState('')
+  const debouncedValue = useDebounceValue(searchQuery)
+  
+  const { isLoading, isRefetching, isRefetchError, isSuccess, data, isError, error, refetch } = useGetRequests(page)
+
+  const changePage = (e, page) => {
+    setPage(page)
+    refetch()
+  }
+
+  // const {
+  //   isLoading: isSearchLoading,
+  //   isError: isSearchError,
+  //   data: searchData,
+  //   refetch: refetchSearch
+  // } = useRequestAccountSearch(searchQuery)
+
+  const search = (e) => {
+    const value = e.target.value
+    if (!value) return
+    setSearchQuery(value)
+  }
+
+  useEffect(() => {
+    const search = async () => {
+      if (!debouncedValue) return
+      try {
+        const response = await axios.get(`/request/account/search?query=${debouncedValue}`)
+        setSearchData(response?.data?.requests)
+      } catch (error) {
+        setSearchError(error.response.data.message)
+      }
+    }
+    search()
+  }, [debouncedValue])
 
   return (
     <>
       <Title>Recent Requests</Title>
       {
-        isError && (
+        isError || isRefetchError && (
           <Typography color="text.secondary" sx={{ flex: 1 }} align='center'>
             {error.response?.data?.message || error?.message}
           </Typography>
         )
       }
+      {
+        searchError && (
+          <Alert severity={'error'} message={searchError}/>
+        )
+      }
+      <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+        <SearchItem search={search}/>
+        <PaginationItem
+          page={page}
+          pages={data?.data?.pages}
+          changePage={changePage}
+        />
+      </Box>
       <Table size="small">
         <TableHead>
           <TableRow>
@@ -46,7 +93,7 @@ export default function Orders() {
         <TableBody>
           {/* eslint-disable-next-line react/prop-types */}
           {
-            isLoading && (
+            isLoading || isRefetching && (
               skeletonRows.map(num => 
                 <TableRow key={num}>
                   <TableCell><Skeleton height={25}/></TableCell>
@@ -60,6 +107,11 @@ export default function Orders() {
             )
           }
           {
+            searchData && (searchData.map(request =>
+              <Row row={request} key={request._id}/>
+            ))
+          }
+          {
             isSuccess && (
               data?.data?.requests?.map(request =>
                 <Row row={request} key={request._id} isLoading={isLoading} />
@@ -68,9 +120,9 @@ export default function Orders() {
           }
         </TableBody>
       </Table>
-      <Link color="primary" href="#" onClick={preventDefault} sx={{ mt: 3 }}>
+      {/* <Link color="primary" href="#" onClick={preventDefault} sx={{ mt: 3 }}>
         See more requests
-      </Link>
+      </Link> */}
     </>
   );
 }
@@ -126,8 +178,11 @@ import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import { formatDistanceToNow } from 'date-fns'
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
-import { styled } from '@mui/material/styles';
 import Zoom from '@mui/material/Zoom'
+import PaginationItem from './Pagination';
+import useDebounceValue from '../hooks/useDebounceValue';
+import { useRequestAccountSearch } from '../hooks/useSearch';
+import SearchItem from './SearchItem';
 
 const LightTooltip = styled(({ className, ...props }) => (
   <Tooltip {...props} classes={{ popper: className }} />
@@ -164,6 +219,11 @@ function HorizontalLinearAlternativeLabelStepper({data}) {
       date: data?.fileReceive.date,
       remarks: data?.fileReceive.remarks
     },
+    {
+      label: data?.fileReceive.status,
+      date: data?.fileReceive.date,
+      remarks: data?.fileReceive.remarks
+    }
   ]
   
   return (

@@ -10,11 +10,15 @@ import { Skeleton, Typography } from '@mui/material';
 import { primaryColor, secondaryColor, contrastText} from '../utils/colors';
 import { useAuthorizeRequest, useGetAuthRequests } from '../hooks/useRequest';
 import Row from './Row'
-import { Backdrop, Box, Slide,TextareaAutosize, Button } from '@mui/material';
+import { Backdrop, Box, Slide, TextareaAutosize, Button } from '@mui/material';
 import { styled } from '@mui/system';
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Alert from './Alert'
 import Theme from './Theme'
+import useDebounceValue from '../hooks/useDebounceValue'
+import axios from "../utils/axios"
+import SearchItem from './SearchItem'
+import {useAuthorizationAccountSearch} from '../hooks/useSearch'
 
 function PendingAuthorizations() {
   
@@ -26,7 +30,18 @@ function PendingAuthorizations() {
   const [id, setId] = useState('')
 
   const { mutate, isSuccess: isAuthSuccess, data: authData, isError: isAuthError, error: authError } = useAuthorizeRequest()
-  
+
+  const [searchQuery, setSearchQuery] = useState('')
+  const debouncedValue = useDebounceValue(searchQuery)
+
+  const {
+    data: searchData,
+    error: searchError,
+    isSuccess: isSearchSuccess,
+    isError: isSearchError,
+    refetch,
+  } = useAuthorizationAccountSearch(debouncedValue)
+
   const authorizeRequest = e => {
     let data = {
       id,
@@ -34,8 +49,17 @@ function PendingAuthorizations() {
       remarks
     }
     mutate(data)
+    // refetch the search data
+    refetch()
     setOpenBackdrop(false)
     setAuthorize('')
+  }
+  
+  const search = (e) => {
+    const value = e.target.value
+    if (!value) return setSearchQuery('')
+    setSearchQuery(value)
+    refetch()
   }
 
   return (
@@ -56,6 +80,16 @@ function PendingAuthorizations() {
               authError?.message
             }
             severity={'error'}
+          />
+        )
+      }
+      {
+        isSearchError && (
+          <Alert severity={'error'}
+            message={
+              searchData?.response?.data?.message ||
+              searchError?.message
+            }
           />
         )
       }
@@ -84,6 +118,9 @@ function PendingAuthorizations() {
         )
       }
       <Title>New Requests</Title>
+      <Box sx={{display: 'flex', flexDirection: 'row', marginTop: 2}}>
+        <SearchItem search={search} />
+      </Box>
       {
         isError && (
           <Typography color="text.secondary" sx={{ flex: 1 }} align='center'>
@@ -116,6 +153,21 @@ function PendingAuthorizations() {
                   <TableCell><Skeleton height={25}/></TableCell>
                 </TableRow>
               )
+            )
+          }
+          {
+            isSearchSuccess && (
+              searchData?.data?.requests.map(request => (
+                <Row
+                  key={request?._id}
+                  row={request}
+                  initialOpenState={false}
+                  setAuthorize={setAuthorize}
+                  setOpenBackdrop={setOpenBackdrop}
+                  setId={setId}
+                  isSearchData
+                />
+              ))
             )
           }
           {
@@ -160,7 +212,7 @@ const StyledTextarea = styled(TextareaAutosize)(
 )
 
 // eslint-disable-next-line react/prop-types
-const Modal = ({ openBackdrop, message, status, authorizeRequest, id, setOpenBackdrop, remarks, setRemarks}) => {
+const Modal = ({ openBackdrop, message, status, authorizeRequest, setOpenBackdrop, remarks, setRemarks}) => {
   
   return (
     <Slide direction="left" in={openBackdrop} mountOnEnter unmountOnExit>
