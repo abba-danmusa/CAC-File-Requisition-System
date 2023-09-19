@@ -15,11 +15,17 @@ import { usePendingApprovalCount, usePendingAuthCounts, usePendingReleaseCount }
 import Skeleton from '@mui/material/Skeleton';
 import Title from '../components/Title';
 import { Typography } from '@mui/material';
+import { socket } from '../utils/socket.io';
+import { useEffect } from 'react';
 
 function MainDashboard() {
 
   const user = JSON.parse(localStorage.getItem('user'))
   
+  useEffect(() => {
+    socket.emit('join-room', user)
+  }, [])
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Grid container spacing={3}>
@@ -171,7 +177,7 @@ const AwaitingFileRelease = () => {
 const AwaitingAuthorization = () => {
   
   const { isLoading, data } = usePendingAuthCounts()
-
+  
   const greetings = () => {
     const now = new Date();
     const hour = now.getHours();
@@ -195,7 +201,7 @@ const AwaitingAuthorization = () => {
       <Typography component="p" variant="h4">
         {
           isLoading && <Skeleton width={50} height={50} /> ||
-          data?.data?.requests[0].count
+          data?.data?.requests?.[0]?.count || 0
         }
       </Typography>
       <Typography color="text.secondary" sx={{ flex: 1 }}>

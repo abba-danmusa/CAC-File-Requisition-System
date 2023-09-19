@@ -1,5 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "../utils/axios";
+import {socket} from '../utils/socket.io'
+
+const user = JSON.parse(localStorage.getItem('user'))
 
 export const useSendRequest = () => {
   const queryClient = useQueryClient()
@@ -21,6 +24,9 @@ export const useSendRequest = () => {
         }
       })
       return {previousRequest}
+    },
+    onSuccess: (data) => {
+      socket.emit('authorization notification', data.data.request, user)
     },
     onError: (_error, _request, context) => {
       queryClient.setQueryData(['requests'], context.previousRequest)
@@ -83,6 +89,7 @@ export const useAuthorizeRequest = () => {
     onMutate: async (newRequest) => {
       await queryClient.cancelQueries(['pending-authorization'])
       await queryClient.cancelQueries(['authorization-request'])
+      await queryClient.cancelQueries(['pending-authorization-count'])
       const previousRequest = queryClient.getQueryData(['pending-authorization'])
       
       queryClient.setQueryData(['pending-authorization'], (oldQueryData) => {
@@ -94,12 +101,20 @@ export const useAuthorizeRequest = () => {
       })
       return {previousRequest}
     },
+    onSuccess: (data) => {
+      socket.emit('approval notification',
+        data.data.request.from,
+        data.data.request._id,
+        data.data.request.requestStatus.authorization
+      )
+    },
     onError: (_error, _request, context) => {
       queryClient.setQueryData(['pending-authorization'], context.previousRequest)
     },
     onSettled: () => {
       queryClient.invalidateQueries(['authorization-request'])
       queryClient.invalidateQueries(['pending-authorization'])
+      queryClient.invalidateQueries(['pending-authorization-count'])
     }
   })
 }
@@ -153,6 +168,13 @@ export const useApproveRequest = () => {
         }
       })
       return {previousRequest}
+    },
+    onSuccess: (data) => {
+      socket.emit('release notification',
+        data.data.request.from,
+        data.data.request._id,
+        data.data.request.requestStatus.approval
+      )
     },
     onError: (_error, _request, context) => {
       queryClient.setQueryData(['pending-approvals'], context.previousRequest)
@@ -224,6 +246,13 @@ export const useSendFile = () => {
       })
       return { previousRequest }
     },
+    onSuccess: data => {
+      socket.emit('file notification',
+        data.data.request.from,
+        data.data.request._id,
+        data.data.request.companyName
+      )
+    },
     onError: (_error, _request, context) => {
       queryClient.setQueryData(['pending-releases'], context.previousRequest)
     },
@@ -265,6 +294,12 @@ export const useConfirmReceipt = () => {
       })
       return { previousRequests, previousLatestRequest }
     },
+    onSuccess: data => {
+      const to = data.data.request.requestStatus.fileRelease.releasedBy._id
+      const from = data.data.request.from.name
+      const companyName = data.data.request.companyName
+      socket.emit('receipt', to, from, companyName)
+    },
     onError: (_error, _request, context) => {
       queryClient.setQueryData(['latest-request'], context.previousLatestRequest)
       queryClient.setQueryData(['requests'], context.previousRequests)
@@ -272,6 +307,100 @@ export const useConfirmReceipt = () => {
     onSettled: () => {
       queryClient.invalidateQueries(['latest-request'])
       queryClient.invalidateQueries(['requests'])
+    }
+  })
+}
+
+export const useReturnFile = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationKey: ['return-file'],
+    mutationFn: async data => {
+      return axios.post('/return/request', data)
+    },
+    onMutate: async (newRequest) => {
+      await queryClient.cancelQueries(['latest-request'])
+      await queryClient.cancelQueries(['requests'])
+      const previousLatestRequest = queryClient.getQueryData(['latest-request'])
+      const previousRequests = queryClient.getQueryData(['requests'])
+
+      queryClient.setQueryData(['latest-request'], (oldQueryData) => {
+        if (!previousLatestRequest) return null
+        return {
+          ...oldQueryData,
+          data: [...oldQueryData.data.request, newRequest]
+        }
+      })
+
+      queryClient.setQueryData(['requests'], (oldQueryData) => {
+        if (!previousRequests) return null
+        return {
+          ...oldQueryData,
+          data: [...oldQueryData.data.requests, newRequest]
+        }
+      })
+      return { previousRequests, previousLatestRequest }
+    },
+    onSuccess: data => {
+      const to = data.data.request.requestStatus.fileRelease.releasedBy._id
+      const from = data.data.request.from.name
+      const request = data.data.request
+      socket.emit('return notification', to, from, request)
+    },
+    onError: (_error, _request, context) => {
+      queryClient.setQueryData(['latest-request'], context.previousLatestRequest)
+      queryClient.setQueryData(['requests'], context.previousRequests)
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries(['latest-request'])
+      queryClient.invalidateQueries(['requests'])
+    }
+  })
+}
+
+export const useAcknowledgeFileReturn = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationKey: ['acknowledge-file-return'],
+    mutationFn: async data => {
+      return axios.post('/return/acknowledged', data)
+    },
+    onMutate: async (newRequest) => {
+      await queryClient.cancelQueries(['returned-files'])
+      await queryClient.cancelQueries(['searched-returned-files'])
+      const previousLatestRequest = queryClient.getQueryData(['returned-file'])
+      const previousRequests = queryClient.getQueryData(['searched-returned-files'])
+
+      queryClient.setQueryData(['returned-file'], (oldQueryData) => {
+        if (!previousLatestRequest) return null
+        return {
+          ...oldQueryData,
+          data: [...oldQueryData.data.request, newRequest]
+        }
+      })
+
+      queryClient.setQueryData(['searched-returned-files'], (oldQueryData) => {
+        if (!previousRequests) return null
+        return {
+          ...oldQueryData,
+          data: [...oldQueryData.data.requests, newRequest]
+        }
+      })
+      return { previousRequests, previousLatestRequest }
+    },
+    onSuccess: data => {
+      const to = data.data.request.requestStatus.fileRelease.releasedBy._id
+      const from = data.data.request.from
+      const request = data.data.request
+      socket.emit('acknowledge', to, from, request)
+    },
+    onError: (_error, _request, context) => {
+      queryClient.setQueryData(['returned-files'], context.previousLatestRequest)
+      queryClient.setQueryData(['searched-returned-files'], context.previousRequests)
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries(['returned-files'])
+      queryClient.invalidateQueries(['searched-returned-files'])
     }
   })
 }
@@ -413,6 +542,17 @@ export const useReleaseFiles = () => {
     queryKey: ['release-files'],
     queryFn: async () => {
       return axios.get('/release/section/request')
+    },
+    retry: 1,
+    refetchOnMount: true
+  })
+}
+
+export const useFilesReturned = (page) => {
+  return useQuery({
+    queryKey: ['returned-files'],
+    queryFn: async () => {
+      return axios.get(`/return/section/returned/request/${page}`)
     },
     retry: 1,
     refetchOnMount: true

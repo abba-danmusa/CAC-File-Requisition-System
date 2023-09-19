@@ -7,7 +7,7 @@ import TableRow from '@mui/material/TableRow';
 import Title from '../components/Title';
 import moment from 'moment'
 import { Box, Collapse, IconButton, Skeleton, Typography, Backdrop, CircularProgress, Button} from '@mui/material'
-import { useConfirmReceipt, useGetRequests } from '../hooks/useRequest'
+import { useConfirmReceipt, useGetRequests, useReturnFile } from '../hooks/useRequest'
 import Tooltip, { tooltipClasses } from '@mui/material/Tooltip'
 import Alert from './Alert'
 import { styled} from '@mui/material/styles'
@@ -176,7 +176,7 @@ const Row = ({ row }) => {
 import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
-import { formatDistanceToNow } from 'date-fns'
+import { formatDistanceToNow} from 'date-fns'
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import Zoom from '@mui/material/Zoom'
 import PaginationItem from './Pagination';
@@ -220,9 +220,9 @@ function HorizontalLinearAlternativeLabelStepper({data}) {
       remarks: data?.fileReceive.remarks
     },
     {
-      label: data?.fileReceive.status,
-      date: data?.fileReceive.date,
-      remarks: data?.fileReceive.remarks
+      label: data?.fileReturn.status,
+      date: data?.fileReturn.date,
+      remarks: data?.fileReturn.remarks
     }
   ]
   
@@ -266,6 +266,24 @@ function HorizontalLinearAlternativeLabelStepper({data}) {
                         </Step>
                       </LightTooltip>
                     )
+                  
+                  if (index === 4 && data?.fileReturn.status === 'Awaiting Return')
+                    return (
+                      <LightTooltip
+                        title={
+                          <ReturnFile request={data} />
+                        }
+                        key={index}
+                        TransitionComponent={Zoom}
+                      >
+                        <Step >
+                          <StepLabel {...labelProps}>
+                            {step.label}
+                          </StepLabel>
+                        </Step>
+                      </LightTooltip>
+                    )
+
                   return (
                     <LightTooltip
                       key={index}
@@ -345,6 +363,63 @@ function ReceiptConfirmation({request}) {
             ':hover': { backgroundColor: secondaryColor, color: contrastText },
           }}
         >Confirm Receipt</Button>
+      </Box>
+    </>
+  )
+}
+
+// eslint-disable-next-line react/prop-types
+function ReturnFile({request}) {
+
+  const {mutate, isLoading, isSuccess, data, isError, error} = useReturnFile()
+
+  const returnFile = e => {
+    mutate({id: e.target.dataset.id})
+  }
+
+  return (
+    <>
+      {
+        isError && (
+          <Alert
+            severity={'error'}
+            message={data?.response?.data?.message ||
+              error?.message}
+          />
+        )
+      }
+      {
+        isSuccess && (
+          <Alert message={data?.data?.message} severity={'success'}/>
+        )
+      }
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={isLoading}
+        // onClick={handleClose}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+      <Box
+        width={200}
+        height={'fit-content'}
+        sx={{ borderRadius: 3, alignContent: 'center', padding: 1 }}
+      >
+        <Typography color="text.primary" sx={{ flex: 1 }}>
+          {/* eslint-disable-next-line react/no-unescaped-entities */}
+          If you want to return this file please click on the button below and wait for the receiving part acknowledge the receipt of the file
+        </Typography>
+        <Button
+          onClick={returnFile}
+          data-id={request._id}
+          sx={{
+            fontSize: '12px',
+            backgroundColor: primaryColor,
+            color: contrastText,
+            alignContent: 'center',
+            ':hover': { backgroundColor: secondaryColor, color: contrastText },
+          }}
+        >Return File</Button>
       </Box>
     </>
   )

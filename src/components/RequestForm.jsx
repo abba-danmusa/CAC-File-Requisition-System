@@ -11,11 +11,12 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useRequisitionState } from '../hooks/useRequisitionState'
 import { contrastText, darkColor, primaryColor, secondaryColor } from '../utils/colors';
 import PostAddIcon from '@mui/icons-material/PostAdd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Alert from './Alert'
 import { useSendRequest } from '../hooks/useRequest';
 import { Backdrop, CircularProgress } from '@mui/material';
-import {FormControl, InputLabel, Select, MenuItem} from '@mui/material'
+import { FormControl, InputLabel, Select, MenuItem } from '@mui/material'
+import { socket } from '../utils/socket.io';
 
 function Copyright(props) {
   return (
@@ -115,7 +116,6 @@ export default function RequestForm() {
     sendRequest({companyName, rcNumber, purpose, rrrNumber, companyType})
     // setInitialState()
   };
-
 
   return (
     <ThemeProvider theme={defaultTheme}>

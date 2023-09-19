@@ -12,15 +12,16 @@ import IconButton from '@mui/material/IconButton';
 import Badge from '@mui/material/Badge';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import NotificationsIcon from '@mui/icons-material/Notifications';
 import Person3Icon from '@mui/icons-material/Person3'
 import { primaryColor, secondaryColor } from '../utils/colors'
 import Menu from '@mui/material/Menu';
-import { useNavigate } from 'react-router-dom';
 import MenuItem from '@mui/material/MenuItem'
+import { useNavigate } from 'react-router-dom';
 import UserMenu from '../components/Menu'
 import UserDashboard from './UserDashboard';
 import { useTab } from '../hooks/useTab';
+import { socket } from '../utils/socket.io';
+import Notifications from '../components/notifications/Notifications';
 
 const drawerWidth = 240;
 
@@ -102,8 +103,13 @@ export default function Dashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem('token')
+    socket.emit('leave-room', user)
     navigate('/signin')
   }
+
+  React.useEffect(() => {
+    socket.emit('join-room', user)
+  }, [user])
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -136,11 +142,9 @@ export default function Dashboard() {
             >
               {currentTab}
             </Typography>
-            <IconButton color="inherit">
-              <Badge badgeContent={4} color="error">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
+
+            {/* Notifications */}
+            <Notifications accountType={user.accountType}/>
             <IconButton
               color='inherit'
               id="basic-button"
@@ -177,7 +181,7 @@ export default function Dashboard() {
               px: [1],
             }}
           >
-            <img src='/src/assets/images/logos.png' style={{width: 150, height: 50}}></img>
+            <img src='/src/assets/images/logos.png' style={{width: 150, height: 50}} loading='lazy'></img>
             <IconButton onClick={toggleDrawer}>
               <ChevronLeftIcon />
             </IconButton>

@@ -7,7 +7,7 @@ import { Skeleton, Typography, Button, Backdrop, CircularProgress } from '@mui/m
 import Tooltip, {tooltipClasses } from '@mui/material/Tooltip';
 import { styled } from '@mui/material/styles';
 import { formatDistanceToNow } from 'date-fns'
-import { useLatestRequestStatus, useConfirmReceipt } from '../hooks/useRequest'
+import { useLatestRequestStatus, useConfirmReceipt, useReturnFile } from '../hooks/useRequest'
 import {primaryColor, contrastText, secondaryColor} from '../utils/colors'
 import Alert from './Alert'
 import Zoom from '@mui/material/Zoom'
@@ -53,9 +53,9 @@ export default function HorizontalLinearAlternativeLabelStepper() {
       remarks: data?.data?.request?.[0]?.fileReceive.remarks
     },
     {
-      label: data?.data?.request?.[0]?.fileReceive.status,
-      date: data?.data?.request?.[0]?.fileReceive.date,
-      remarks: data?.data?.request?.[0]?.fileReceive.remarks
+      label: data?.data?.request?.[0]?.fileReturn.status,
+      date: data?.data?.request?.[0]?.fileReturn.date,
+      remarks: data?.data?.request?.[0]?.fileReturn.remarks
     },
   ]
 
@@ -100,6 +100,23 @@ export default function HorizontalLinearAlternativeLabelStepper() {
                     return (
                       <LightTooltip
                         title={<ReceiptConfirmation request={data?.data?.request?.[0] } />}
+                        key={index}
+                        TransitionComponent={Zoom}
+                      >
+                        <Step >
+                          <StepLabel {...labelProps}>
+                            {step.label}
+                          </StepLabel>
+                        </Step>
+                      </LightTooltip>
+                    )
+                  
+                  if (index === 4 && data?.data?.request?.[0].fileReturn.status === 'Awaiting Return')
+                    return (
+                      <LightTooltip
+                        title={
+                          <ReturnFile request={data?.data?.request?.[0]} />
+                        }
                         key={index}
                         TransitionComponent={Zoom}
                       >
@@ -189,6 +206,63 @@ function ReceiptConfirmation({request}) {
             ':hover': { backgroundColor: secondaryColor, color: contrastText },
           }}
         >Confirm Receipt</Button>
+      </Box>
+    </>
+  )
+}
+
+// eslint-disable-next-line react/prop-types
+function ReturnFile({request}) {
+
+  const {mutate, isLoading, isSuccess, data, isError, error} = useReturnFile()
+
+  const returnFile = e => {
+    mutate({id: e.target.dataset.id})
+  }
+
+  return (
+    <>
+      {
+        isError && (
+          <Alert
+            severity={'error'}
+            message={data?.response?.data?.message ||
+              error?.message}
+          />
+        )
+      }
+      {
+        isSuccess && (
+          <Alert message={data?.data?.message} severity={'success'}/>
+        )
+      }
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={isLoading}
+        // onClick={handleClose}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+      <Box
+        width={200}
+        height={'fit-content'}
+        sx={{ borderRadius: 3, alignContent: 'center', padding: 1 }}
+      >
+        <Typography color="text.primary" sx={{ flex: 1 }}>
+          {/* eslint-disable-next-line react/no-unescaped-entities */}
+          If you want to return this file please click on the button below and wait for the receiving part acknowledge the receipt of the file
+        </Typography>
+        <Button
+          onClick={returnFile}
+          data-id={request._id}
+          sx={{
+            fontSize: '12px',
+            backgroundColor: primaryColor,
+            color: contrastText,
+            alignContent: 'center',
+            ':hover': { backgroundColor: secondaryColor, color: contrastText },
+          }}
+        >Return File</Button>
       </Box>
     </>
   )

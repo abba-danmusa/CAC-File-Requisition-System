@@ -5,6 +5,25 @@ import LandingPage from './pages/LandingPage';
 import {QueryClientProvider, QueryClient} from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import DashboardPage from './pages/DashboardPage';
+import {socket} from './utils/socket.io.jsx'
+
+const hasNotificationAPI = 'Notification' in window || 'webkitNotifications' in window
+
+if (hasNotificationAPI && Notification.permission !== 'granted') Notification.requestPermission()
+
+const notify = notification => {
+  if ('Notification' in window) {
+    if (Notification.permission == 'granted') {
+      new Notification(notification.subject, {
+        body: notification.body,
+        icon: '/assets/images/logos.png',
+        tag: notification.tag
+      })
+    }
+  }
+}
+
+socket.on('notification', notify)
 
 function App() {
   const queryClient = new QueryClient()

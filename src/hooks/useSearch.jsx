@@ -48,3 +48,15 @@ export const useManageAccountSearch = (value) => {
     enabled: false
   })
 }
+
+export const useReturnedFilesSearch = (value) => {
+  return useQuery({
+    queryKey: ['searched-returned-files'],
+    queryFn: async () => {
+      return axios.get(`/manage/account/search?query=${value}`)
+    },
+    retry: 1,
+    refetchOnMount: true,
+    enabled: false
+  })
+}

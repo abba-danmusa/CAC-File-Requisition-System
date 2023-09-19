@@ -1,9 +1,10 @@
 import { useState } from "react"
 import MainDashboard from "../components/MainDashboard"
 import Requests from "../components/Menu/Requests"
-import { useAwaitAuthorization, useAwaitApproval, useAuthorizedRequests, useApprovedRequests, useFilesReceived, useAcceptedAuthorizationRequests, useDeclinedAuthorizationRequests, useAllAuthorizationRequests, useAcceptedApprovalRequests, useRejectedApprovalRequests, useApprovalRequests, useReleasedFiles, useReleaseFiles } from "../hooks/useRequest"
+import { useAwaitAuthorization, useAwaitApproval, useAuthorizedRequests, useApprovedRequests, useFilesReceived, useAcceptedAuthorizationRequests, useDeclinedAuthorizationRequests, useAllAuthorizationRequests, useAcceptedApprovalRequests, useRejectedApprovalRequests, useApprovalRequests, useReleasedFiles, useReleaseFiles, useFilesReturned } from "../hooks/useRequest"
 import { useTab } from "../hooks/useTab"
-import FileRelease from "../components/FileRelease"
+import FileRelease from "../components/FileReturn"
+import FileReturn from "../components/FileReturn"
 
 // eslint-disable-next-line react/prop-types
 function UserDashboard() {
@@ -302,46 +303,31 @@ function AllApprovalRequests() {
 }
 
 function ReleasedFiles() {
-  const {
-    isLoading,
-    isSuccess,
-    isError,
-    data,
-    error,
-    refetch
-  } = useReleasedFiles()
+  // const {
+  //   isLoading,
+  //   isSuccess,
+  //   isError,
+  //   data,
+  //   error,
+  //   refetch
+  // } = useReleasedFiles()
 
   return (
-    <FileRelease
-      isLoading={isLoading}
-      isSuccess={isSuccess}
-      isError={isError}
-      data={data}
-      error={error}
-      refetch={refetch}
-    />
+    <p>ReleasedFiles</p>
+    // <FileRelease
+    //   isLoading={isLoading}
+    //   isSuccess={isSuccess}
+    //   isError={isError}
+    //   data={data}
+    //   error={error}
+    //   refetch={refetch}
+    // />
   )
 }
 
 function ReturnedFiles() {
-  const {
-    isLoading,
-    isSuccess,
-    isError,
-    data,
-    error,
-    refetch
-  } = useReleasedFiles()
-
   return (
-    <FileRelease
-      isLoading={isLoading}
-      isSuccess={isSuccess}
-      isError={isError}
-      data={data}
-      error={error}
-      refetch={refetch}
-    />
+    <FileReturn />
   )
 }
 
