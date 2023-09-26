@@ -9,9 +9,12 @@ import moment from 'moment'
 import { Box, Collapse, IconButton, Skeleton, Typography, Backdrop, CircularProgress, Button, Container, Grid, Paper} from '@mui/material'
 import Tooltip, { tooltipClasses } from '@mui/material/Tooltip'
 import Alert from '../Alert'
+import RequestChart from './RequestChart'
+import SearchItem from '../SearchItem'
+import {secondaryColor} from '../../utils/colors'
 
 // eslint-disable-next-line react/prop-types
-export default function Requests({isError, error, isLoading, isSuccess, data, isRefetching, isRefetchError, page, changePage}) {
+export default function Requests({isError, error, isLoading, isSuccess, data, isRefetching, isRefetchError, page, changePage, search, searchData, isSearchError, searchError}) {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -26,11 +29,14 @@ export default function Requests({isError, error, isLoading, isSuccess, data, is
                 </Typography>
               )
             }
-            <PaginationItem
-              page={page}
-              pages={data?.data?.pages}
-              changePage={changePage}
-            />
+            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+              <SearchItem search={search} />
+              <PaginationItem
+                page={page}
+                pages={data?.data?.pages}
+                changePage={changePage}
+              />
+            </Box>
             <Table size="small">
               <TableHead>
                 <TableRow>
@@ -59,9 +65,23 @@ export default function Requests({isError, error, isLoading, isSuccess, data, is
                   )
                 }
                 {
+                  searchData?.map(request => 
+                    <Row
+                      row={request}
+                      key={request._id}
+                      isLoading={isLoading}
+                      isSearchData
+                    />
+                  )
+                }
+                {
                   isSuccess && (
                     data?.data?.requests?.map(request =>
-                      <Row row={request} key={request._id} isLoading={isLoading} />
+                      <Row
+                        row={request}
+                        key={request._id}
+                        isLoading={isLoading}
+                      />
                     )
                   )
                 }
@@ -77,12 +97,12 @@ export default function Requests({isError, error, isLoading, isSuccess, data, is
 const skeletonRows = [1,2,3,4,5,6,]
 
 // eslint-disable-next-line react/prop-types
-const Row = ({ row }) => {
+const Row = ({ row, isSearchData}) => {
   const [open, setOpen] = useState(false)
 
   return (
     <>
-      <TableRow key={row._id}>
+      <TableRow key={row._id} sx={(isSearchData ? {border: `1px ridge ${secondaryColor}`} : {})}>
         <TableCell>
           <IconButton
             aria-label="expand row"
@@ -108,10 +128,7 @@ const Row = ({ row }) => {
             sx={{ boxShadow: 10, borderRadius: 2, paddingTop: 2 }}
           >
             <Box sx={{ margin: 1 }}>
-              {/* <Typography variant="h6" gutterBottom component="div">
-                Status
-              </Typography> */}
-              <HorizontalLinearAlternativeLabelStepper data={row}/>
+              <RequestChart request={row}/>
             </Box>
           </Collapse>
         </TableCell>

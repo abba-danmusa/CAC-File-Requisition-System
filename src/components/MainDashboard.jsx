@@ -24,7 +24,7 @@ function MainDashboard() {
   
   useEffect(() => {
     socket.emit('join-room', user)
-  }, [])
+  }, [user])
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>

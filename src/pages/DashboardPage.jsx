@@ -13,7 +13,7 @@ import Badge from '@mui/material/Badge';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import Person3Icon from '@mui/icons-material/Person3'
-import { primaryColor, secondaryColor } from '../utils/colors'
+import { darkColor, primaryColor, secondaryColor } from '../utils/colors'
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem'
 import { useNavigate } from 'react-router-dom';
@@ -75,7 +75,7 @@ const defaultTheme = createTheme({
     primary: {
       main: primaryColor,
       light: secondaryColor,
-      dark: 'red',
+      dark: darkColor,
       contrastText: '#fff'
     }
   }
@@ -103,6 +103,7 @@ export default function Dashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem('token')
+    localStorage.removeItem('user')
     socket.emit('leave-room', user)
     navigate('/signin')
   }

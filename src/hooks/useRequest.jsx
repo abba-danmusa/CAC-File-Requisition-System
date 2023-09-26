@@ -321,8 +321,10 @@ export const useReturnFile = () => {
     onMutate: async (newRequest) => {
       await queryClient.cancelQueries(['latest-request'])
       await queryClient.cancelQueries(['requests'])
+      await queryClient.cancelQueries(['searched-received-files'])
       const previousLatestRequest = queryClient.getQueryData(['latest-request'])
       const previousRequests = queryClient.getQueryData(['requests'])
+      const searchRequests = queryClient.getQueryData(['searched-received-files'])
 
       queryClient.setQueryData(['latest-request'], (oldQueryData) => {
         if (!previousLatestRequest) return null
@@ -339,19 +341,29 @@ export const useReturnFile = () => {
           data: [...oldQueryData.data.requests, newRequest]
         }
       })
-      return { previousRequests, previousLatestRequest }
+
+      queryClient.setQueryData(['searched-received-files'], (oldQueryData) => {
+        if (!searchRequests) return null
+        return {
+          ...oldQueryData,
+          data: [...oldQueryData.data.requests, newRequest]
+        }
+      })
+      return { previousRequests, previousLatestRequest, searchRequests }
     },
     onSuccess: data => {
-      const to = data.data.request.requestStatus.fileRelease.releasedBy._id
-      const from = data.data.request.from.name
-      const request = data.data.request
+      const to = data?.data?.request?.requestStatus.fileRelease.releasedBy._id
+      const from = data?.data?.request?.from.name
+      const request = data?.data?.request
       socket.emit('return notification', to, from, request)
     },
     onError: (_error, _request, context) => {
       queryClient.setQueryData(['latest-request'], context.previousLatestRequest)
       queryClient.setQueryData(['requests'], context.previousRequests)
+      queryClient.setQueryData(['searched-received-files'], context.previousRequests)
     },
     onSettled: () => {
+      queryClient.refetchQueries(['searched-received-files'])
       queryClient.invalidateQueries(['latest-request'])
       queryClient.invalidateQueries(['requests'])
     }

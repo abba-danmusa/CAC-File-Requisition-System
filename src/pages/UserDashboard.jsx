@@ -5,6 +5,7 @@ import { useAwaitAuthorization, useAwaitApproval, useAuthorizedRequests, useAppr
 import { useTab } from "../hooks/useTab"
 import FileRelease from "../components/FileReturn"
 import FileReturn from "../components/FileReturn"
+import { useReceivedFilesSearch } from "../hooks/useSearch"
 
 // eslint-disable-next-line react/prop-types
 function UserDashboard() {
@@ -36,9 +37,7 @@ function UserDashboard() {
     'Recent Requests': <RecentRequests/>
   }[currentTab]
 
-  return (
-    <>{currentView}</>
-  )
+  return currentView
 }
 
 // Request Account
@@ -159,6 +158,26 @@ function FilesReceived() {
     refetch()
   }
 
+  const [searchValue, setSearchValue] = useState('')
+
+  const {
+    data: searchData,
+    refetch: refetchSearchData,
+    isError: isSearchError,
+    error: searchError
+  } = useReceivedFilesSearch(searchValue)
+
+  const search = (e, delay = 250) => {
+    const value = e.target.value
+    const handler = setTimeout(() => {
+      setSearchValue(value)
+      refetchSearchData()
+    }, delay)
+    return () => {
+      clearTimeout(handler)
+    }
+  }
+
   return (
     <Requests
       isLoading={isLoading}
@@ -170,6 +189,10 @@ function FilesReceived() {
       isRefetching={isRefetching}
       isRefetchError={isRefetchError}
       changePage={changePage}
+      search={search}
+      searchData={searchData?.data.requests}
+      isSearchError={isSearchError}
+      searchError={searchError}
     />
   )
 }

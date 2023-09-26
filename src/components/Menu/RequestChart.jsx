@@ -2,14 +2,14 @@ import Box from '@mui/material/Box';
 import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
-import Title from './Title';
-import { Skeleton, Typography, Button, Backdrop, CircularProgress } from '@mui/material';
+import Title from '../Title';
+import { Skeleton, Typography, Button, Backdrop, CircularProgress, Grid, Paper} from '@mui/material';
 import Tooltip, {tooltipClasses } from '@mui/material/Tooltip';
 import { styled } from '@mui/material/styles';
 import { formatDistanceToNow } from 'date-fns'
-import { useLatestRequestStatus, useConfirmReceipt, useReturnFile } from '../hooks/useRequest'
-import {primaryColor, contrastText, secondaryColor} from '../utils/colors'
-import Alert from './Alert'
+import { useConfirmReceipt, useReturnFile } from '../../hooks/useRequest'
+import {primaryColor, contrastText, secondaryColor} from '../../utils/colors'
+import Alert from '../Alert'
 import Zoom from '@mui/material/Zoom'
 
 const LightTooltip = styled(({ className, ...props }) => (
@@ -24,38 +24,33 @@ const LightTooltip = styled(({ className, ...props }) => (
 }));
 
 // eslint-disable-next-line react/prop-types
-export default function HorizontalLinearAlternativeLabelStepper() {
-  
-  const {
-    isLoading,
-    data
-  } = useLatestRequestStatus()
+export default function RequestChart({isLoading, request}) {
 
   const steps = [
     {
-      label: data?.data?.request?.[0]?.authorization.status,
-      date: data?.data?.request?.[0]?.authorization.date,
-      remarks: data?.data?.request?.[0]?.authorization.remarks
+      label: request?.authorization.status,
+      date: request?.authorization.date,
+      remarks: request?.authorization.remarks
     },
     {
-      label: data?.data?.request?.[0]?.approval.status,
-      date: data?.data?.request?.[0]?.approval.date,
-      remarks: data?.data?.request?.[0]?.approval.remarks
+      label: request?.approval.status,
+      date: request?.approval.date,
+      remarks: request?.approval.remarks
     },
     {
-      label: data?.data?.request?.[0]?.fileRelease.status,
-      date: data?.data?.request?.[0]?.fileRelease.date,
-      remarks: data?.data?.request?.[0]?.fileRelease.remarks
+      label: request?.fileRelease.status,
+      date: request?.fileRelease.date,
+      remarks: request?.fileRelease.remarks
     },
     {
-      label: data?.data?.request?.[0]?.fileReceive.status,
-      date: data?.data?.request?.[0]?.fileReceive.date,
-      remarks: data?.data?.request?.[0]?.fileReceive.remarks
+      label: request?.fileReceive.status,
+      date: request?.fileReceive.date,
+      remarks: request?.fileReceive.remarks
     },
     {
-      label: data?.data?.request?.[0]?.fileReturn.status,
-      date: data?.data?.request?.[0]?.fileReturn.date,
-      remarks: data?.data?.request?.[0]?.fileReturn.remarks
+      label: request?.fileReturn.status,
+      date: request?.fileReturn.date,
+      remarks: request?.fileReturn.remarks
     },
   ]
 
@@ -65,8 +60,8 @@ export default function HorizontalLinearAlternativeLabelStepper() {
       {/* eslint-disable-next-line react/prop-types, react/prop-types */}
       {isLoading && <Skeleton width={'50%'}/>}
       {
-        data?.data?.request?.[0] && (
-          <p>{`${data?.data?.request?.[0]?.companyName || ''}`}</p>
+        request && (
+          <p>{`${request?.companyName || ''}`}</p>
         )
       }
       <Box sx={{ width: '100%' }}>
@@ -81,11 +76,16 @@ export default function HorizontalLinearAlternativeLabelStepper() {
           )
         }
         {
-          data?.data?.request?.[0] && (
+          request && (
             <Stepper
-              activeStep={data?.data?.request?.[0]?.step}
+              activeStep={request?.step}
               alternativeLabel
-              sx={{ boxShadow: 0, padding: 0, borderRadius: 2 }}
+              sx={{
+                boxShadow: 20,
+                paddingTop: 5,
+                paddingBottom: 5,
+                borderRadius: 2
+              }}
             >
               {
                 steps?.map((step, index) => {
@@ -100,10 +100,10 @@ export default function HorizontalLinearAlternativeLabelStepper() {
                     </Typography>
                   );
 
-                  if (index === 3 && data?.data?.request?.[0].fileRelease.status === 'File Released' && data?.data?.request?.[0].fileReceive.status === 'Awaiting File')
+                  if (index === 3 && request.fileRelease.status === 'File Released' && request.fileReceive.status === 'Awaiting File')
                     return (
                       <LightTooltip
-                        title={<ReceiptConfirmation request={data?.data?.request?.[0] } />}
+                        title={<ReceiptConfirmation request={request } />}
                         key={index}
                         TransitionComponent={Zoom}
                       >
@@ -115,11 +115,11 @@ export default function HorizontalLinearAlternativeLabelStepper() {
                       </LightTooltip>
                     )
                   
-                  if (index === 4 && data?.data?.request?.[0].fileReturn.status === 'Awaiting Return')
+                  if (index === 4 && request.fileReturn.status === 'Awaiting Return' && request.step === 4)
                     return (
                       <LightTooltip
                         title={
-                          <ReturnFile request={data?.data?.request?.[0]} />
+                          <ReturnFile request={request} />
                         }
                         key={index}
                         TransitionComponent={Zoom}
@@ -148,7 +148,7 @@ export default function HorizontalLinearAlternativeLabelStepper() {
               }
             </Stepper>
           ) ||
-          !(data?.data?.requests) && (
+          !(request) && (
             <Typography color="text.secondary" sx={{ flex: 1 }}>
               The status of your file requests shows here
             </Typography>

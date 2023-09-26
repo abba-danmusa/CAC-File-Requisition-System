@@ -16,7 +16,7 @@ const notify = notification => {
     if (Notification.permission == 'granted') {
       new Notification(notification.subject, {
         body: notification.body,
-        icon: '/assets/images/logos.png',
+        icon: '/src/assets/images/logos.png',
         tag: notification.tag
       })
     }

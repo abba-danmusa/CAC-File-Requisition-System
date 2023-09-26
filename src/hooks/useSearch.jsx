@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import axios from "../utils/axios"
+import Alert from '../components/Alert'
 
 export const useRequestAccountSearch = (value) => {
   return useQuery({
@@ -54,6 +55,21 @@ export const useReturnedFilesSearch = (value) => {
     queryKey: ['searched-returned-files'],
     queryFn: async () => {
       return axios.get(`/manage/account/search?query=${value}`)
+    },
+    retry: 1,
+    refetchOnMount: true,
+    enabled: false
+  })
+}
+
+export const useReceivedFilesSearch = (value) => {
+  return useQuery({
+    queryKey: ['searched-received-files'],
+    queryFn: async () => {
+      return axios.get(`/request/account/receive/search?query=${value}`)
+    },
+    onError: error => {
+      return <Alert severity={'error'} message={error.response.data.message} />
     },
     retry: 1,
     refetchOnMount: true,

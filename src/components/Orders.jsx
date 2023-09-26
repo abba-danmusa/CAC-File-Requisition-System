@@ -238,7 +238,16 @@ function HorizontalLinearAlternativeLabelStepper({data}) {
       <Box sx={{ width: '100%' }}>
         {
           data && (
-            <Stepper activeStep={data?.step} alternativeLabel sx={{boxShadow: 20, paddingTop: 5, paddingBottom: 5, borderRadius: 2}}>
+            <Stepper
+              activeStep={data?.step}
+              alternativeLabel
+              sx={{
+                boxShadow: 20,
+                paddingTop: 5,
+                paddingBottom: 5,
+                borderRadius: 2
+              }}
+            >
               {
                 steps?.map((step, index) => {
                   const labelProps = {};
@@ -267,7 +276,7 @@ function HorizontalLinearAlternativeLabelStepper({data}) {
                       </LightTooltip>
                     )
                   
-                  if (index === 4 && data?.fileReturn.status === 'Awaiting Return')
+                  if (index === 4 && data?.fileReturn.status === 'Awaiting Return' && data.step === 4)
                     return (
                       <LightTooltip
                         title={
