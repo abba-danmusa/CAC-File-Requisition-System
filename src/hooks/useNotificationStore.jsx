@@ -2,16 +2,18 @@ import { create } from 'zustand'
 
 const initialState = {
   remarks: '',
+  reason: '',
   openBackdrop: false,
   id: '',
-  modalTitle: ''
+  modal: ''
 }
 
 export const useNotificationStore = create(set => ({
   ...initialState,
-  setId: id => set({id}),
+  setId: id => set({ id }),
+  setModal: modal => set({ modal }),
+  setReason: reason => set({ reason }),
   setRemarks: remarks => set({ remarks }),
   setOpenBackdrop: openBackdrop => set({ openBackdrop }),
-  setModalTitle: title => set({modalTitle: title}),
   setInitialState: () => set(initialState)
 }))

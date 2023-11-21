@@ -2,6 +2,7 @@ import Box from '@mui/material/Box'
 import { useNotificationStore } from '../../hooks/useNotificationStore'
 import Typography from '@mui/material/Typography'
 import CustomButton from './CustomButton'
+import { Divider } from '@mui/material'
 
 // eslint-disable-next-line react/prop-types
 const NotificationItem = ({ request }) => {
@@ -9,17 +10,17 @@ const NotificationItem = ({ request }) => {
   const date = request?.requestStatus?.fileReturn?.timeElapse?.time
   const returnDate = new Date(date)
 
-  const {setOpenBackdrop, setId, setModalTitle} = useNotificationStore()
+  const {setOpenBackdrop, setId, setModal} = useNotificationStore()
 
   const moreTime = () => {
-    setModalTitle('more')
     setId(request._id)
+    setModal('more')
     setOpenBackdrop(true)
   }
 
   const returnFile = () => {
-    setModalTitle('return')
     setId(request._id)
+    setModal('return')
     setOpenBackdrop(true)
   }
 
@@ -32,8 +33,9 @@ const NotificationItem = ({ request }) => {
       }}>
       <Typography align='center' mb={2} color={'error'}>Remainder</Typography>
       <Typography mb={1}>{`${request?.companyName} `}</Typography>
-      <Typography>Return Date Due</Typography>
-      <Typography color='error'>{`${returnDate}`}</Typography>
+      <Divider/>
+      <Typography mt={1} fontWeight={300} fontSize={13}>Return Date</Typography>
+      <Typography color='error' fontSize={12}>{`${returnDate}`}</Typography>
       <Box
         sx={{
           display: 'flex',

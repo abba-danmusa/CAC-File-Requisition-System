@@ -21,7 +21,9 @@ import UserMenu from '../components/Menu'
 import UserDashboard from './UserDashboard';
 import { useTab } from '../hooks/useTab';
 import { socket } from '../utils/socket.io';
-import Notifications from '../components/notifications/Notifications';
+import Notifications from '../components/notifications/Notifications'
+import { ToastContainer } from 'react-toastify'
+import "react-toastify/dist/ReactToastify.css"
 
 const drawerWidth = 240;
 
@@ -114,6 +116,7 @@ export default function Dashboard() {
 
   return (
     <ThemeProvider theme={defaultTheme}>
+      <ToastContainer/>
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
         <AppBar position="absolute" open={open}>

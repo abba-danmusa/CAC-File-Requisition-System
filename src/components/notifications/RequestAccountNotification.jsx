@@ -1,52 +1,80 @@
 import NotificationsIcon from '@mui/icons-material/Notifications'
 import Badge from '@mui/material/Badge'
-import { IconButton, Paper, Zoom} from "@mui/material"
+import { IconButton, Zoom} from "@mui/material"
 import { useReturnNotification } from '../../hooks/useNotifications';
 import {useNotificationStore} from '../../hooks/useNotificationStore'
-import { useReturnFile } from '../../hooks/useRequest'
-import { styled } from '@mui/material/styles'
+import { useReturnFile, useRequestAdditionalTime } from '../../hooks/useRequest'
 import CustomModal from './CustomModal'
 import NotificationContent from './NotificationContent'
 import LightTooltip from './LightTooltip'
-
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-  ...theme.typography.body2,
-  padding: theme.spacing(1),
-  textAlign: 'center',
-  color: theme.palette.text.secondary,
-}))
+import { toast } from 'react-toastify'
 
 function RequestAccountNotification() {
-  const { data } = useReturnNotification()
-  const {mutate, isSuccess, data: successMessage, isError, error} = useReturnFile()
-  const { modalTitle, id, setOpenBackdrop } = useNotificationStore()
   
-  const cancel = () => {
+  const { data, refetch } = useReturnNotification()
+  const numberOfNotifications = data?.data?.requests?.length
+
+  const { mutate } = useReturnFile()
+  const { mutate: request } = useRequestAdditionalTime()
+  
+  const { modal, id, setId, setOpenBackdrop, reason, remarks, setReason, setRemarks} = useNotificationStore()
+  
+  const closeModal = () => {
     setOpenBackdrop(false)
   }
 
-  const submit = () => {
-    if (modalTitle == 'return') {
-      mutate({ id })
-      setOpenBackdrop(false)
-      return
-    }
+  const returnFile = () => {
+    mutate({ id, remarks })
+    // found out that calling refetch immediately after mutate doesn't get the new data. so wait after .2.5 secs before refetching.
+    setTimeout(() => {
+      refetch()
+    }, 2500)
+    setId('')
+    setOpenBackdrop(false)
   }
-  const numberOfNotifications = data?.data.requests.length
+
+  const requestAdditionalTime = () => {
+    if (!reason) {
+      return toast.
+        warn('Please provide a reason why you\'d like additional time')
+    }
+    request({id, reason})
+    // found out that calling refetch immediately after mutate doesn't get the new data. so wait after 2.5 secs before refetching.
+    setTimeout(() => {
+      refetch()
+    }, 2500)
+    setId('')
+    setOpenBackdrop(false)
+  }
+
+  const moreTimeTitle = 'You are about to request for more time from the RMD'
+  const returnTitle = 'You are about to return this  file'
+  const selectedModal = {
+    return: <CustomModal
+      submit={returnFile}
+      cancel={closeModal}
+      title={returnTitle}
+      inputValue={remarks}
+      setInputValue={setRemarks}
+      placeholder={'Remarks? (Optional)'}
+    />,
+    more: <CustomModal
+      submit={requestAdditionalTime}
+      cancel={closeModal}
+      title={moreTimeTitle}
+      inputValue={reason}
+      setInputValue={setReason}
+      placeholder={'Reason (Required)'}
+    />
+  }[modal]
 
   return (
     <>
-      <CustomModal
-        submit={submit}
-        cancel={cancel}
-        isSuccess={isSuccess}
-        successMessage={successMessage?.data.message}
-        isError={isError}
-        errorMessage={error?.message}
-      />
+      {selectedModal}
       <LightTooltip
-        title={<NotificationContent requests={ data?.data?.requests} />}
+        title={
+          <NotificationContent requests={data?.data?.requests}/>
+        }
         placement={'left-end'}
         transitionComponent={Zoom}
       >

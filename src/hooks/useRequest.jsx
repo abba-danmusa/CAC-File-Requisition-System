@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "../utils/axios";
 import {socket} from '../utils/socket.io'
+import {toast} from 'react-toastify'
 
 const user = JSON.parse(localStorage.getItem('user'))
 
@@ -187,6 +188,48 @@ export const useApproveRequest = () => {
   })
 }
 
+export const useApproveAdditionalTimeRequest = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationKey: ['approve-additional-time-request'],
+    mutationFn: async data => {
+      return axios.post('/approval/time/request', data)
+    },
+    onMutate: async (newRequest) => {
+      await queryClient.cancelQueries(['pending-approvals'])
+      await queryClient.cancelQueries(['pending-approval'])
+      await queryClient.cancelQueries(["pending-approval-count"])
+      const previousRequest = queryClient.getQueryData(['pending-approvals'])
+      
+      queryClient.setQueryData(['pending-approvals'], (oldQueryData) => {
+        if (!previousRequest) return null
+        return {
+          ...oldQueryData,
+          data: [...oldQueryData.data.requests, newRequest]
+        }
+      })
+      return {previousRequest}
+    },
+    onSuccess: (data) => {
+      toast.success(data?.data.message)
+      socket.emit('release notification',
+        data.data.request.from,
+        data.data.request._id,
+        data.data.request.requestStatus.approval
+      )
+    },
+    onError: (error, _request, context) => {
+      toast.success(error.response.message)
+      queryClient.setQueryData(['pending-approvals'], context.previousRequest)
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries(['pending-approvals'])
+      queryClient.invalidateQueries(['pending-approval'])
+      queryClient.invalidateQueries(["pending-approval-count"])
+    }
+  })
+}
+
 export const usePendingApprovalCount = () => {
   return useQuery({
     queryKey: ['pending-approval-count'],
@@ -295,6 +338,7 @@ export const useConfirmReceipt = () => {
       return { previousRequests, previousLatestRequest }
     },
     onSuccess: data => {
+      toast.success(data?.data.message)
       const to = data.data.request.requestStatus.fileRelease.releasedBy._id
       const from = data.data.request.from.name
       const companyName = data.data.request.companyName
@@ -352,12 +396,14 @@ export const useReturnFile = () => {
       return { previousRequests, previousLatestRequest, searchRequests }
     },
     onSuccess: data => {
+      toast.success(data?.data.message)
       const to = data?.data?.request?.requestStatus.fileRelease.releasedBy._id
       const from = data?.data?.request?.from.name
       const request = data?.data?.request
       socket.emit('return notification', to, from, request)
     },
-    onError: (_error, _request, context) => {
+    onError: (error, _request, context) => {
+      toast.error(error?.response.message)
       queryClient.setQueryData(['latest-request'], context.previousLatestRequest)
       queryClient.setQueryData(['requests'], context.previousRequests)
       queryClient.setQueryData(['searched-received-files'], context.previousRequests)
@@ -401,6 +447,7 @@ export const useAcknowledgeFileReturn = () => {
       return { previousRequests, previousLatestRequest }
     },
     onSuccess: data => {
+      toast.success(data?.data.message)
       const to = data.data.request.requestStatus.fileRelease.releasedBy._id
       const from = data.data.request.from
       const request = data.data.request
@@ -568,5 +615,66 @@ export const useFilesReturned = (page) => {
     },
     retry: 1,
     refetchOnMount: true
+  })
+}
+
+export const useRequestAdditionalTime = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationKey: ['request-more-time'],
+    mutationFn: async data => {
+      return axios.post('/request/time', data)
+    },
+    onMutate: async (newRequest) => {
+      await queryClient.cancelQueries(['latest-request'])
+      await queryClient.cancelQueries(['requests'])
+      await queryClient.cancelQueries(['searched-received-files'])
+      const previousLatestRequest = queryClient.getQueryData(['latest-request'])
+      const previousRequests = queryClient.getQueryData(['requests'])
+      const searchRequests = queryClient.getQueryData(['searched-received-files'])
+
+      queryClient.setQueryData(['latest-request'], (oldQueryData) => {
+        if (!previousLatestRequest) return null
+        return {
+          ...oldQueryData,
+          data: [...oldQueryData.data.request, newRequest]
+        }
+      })
+
+      queryClient.setQueryData(['requests'], (oldQueryData) => {
+        if (!previousRequests) return null
+        return {
+          ...oldQueryData,
+          data: [...oldQueryData.data.requests, newRequest]
+        }
+      })
+
+      queryClient.setQueryData(['searched-received-files'], (oldQueryData) => {
+        if (!searchRequests) return null
+        return {
+          ...oldQueryData,
+          data: [...oldQueryData.data.requests, newRequest]
+        }
+      })
+      return { previousRequests, previousLatestRequest, searchRequests }
+    },
+    onSuccess: data => {
+      toast.success(data?.data.message)
+      const to = 'Approval Account'
+      const from = data?.data?.request?.from.name
+      const request = data?.data.request
+      socket.emit('more notification', to, from, request)
+    },
+    onError: (error, _request, context) => {
+      toast.success(error.response.data.message)
+      queryClient.setQueryData(['latest-request'], context.previousLatestRequest)
+      queryClient.setQueryData(['requests'], context.previousRequests)
+      queryClient.setQueryData(['searched-received-files'], context.previousRequests)
+    },
+    onSettled: () => {
+      queryClient.refetchQueries(['searched-received-files'])
+      queryClient.invalidateQueries(['latest-request'])
+      queryClient.invalidateQueries(['requests'])
+    }
   })
 }

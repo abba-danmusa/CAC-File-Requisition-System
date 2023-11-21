@@ -6,7 +6,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Title from '../components/Title';
 import moment from 'moment'
-import { Box, Collapse, IconButton, Skeleton, Typography, Backdrop, CircularProgress, Button} from '@mui/material'
+import { Box, Collapse, IconButton, Skeleton, Typography, Backdrop, CircularProgress, Button, Divider} from '@mui/material'
 import { useConfirmReceipt, useGetRequests, useReturnFile } from '../hooks/useRequest'
 import Tooltip, { tooltipClasses } from '@mui/material/Tooltip'
 import Alert from './Alert'
@@ -225,6 +225,11 @@ function HorizontalLinearAlternativeLabelStepper({data}) {
       remarks: data?.fileReturn.remarks
     }
   ]
+  const additionalTime = [{
+    label: data?.additionalTime.status,
+    date: data?.additionalTime.date,
+    remarks: data?.additionalTime.remarks
+  }]
   
   return (
     <>
@@ -307,6 +312,41 @@ function HorizontalLinearAlternativeLabelStepper({data}) {
                     </LightTooltip>
                   )
                 })
+              }
+              {/* Additional time step */}
+              {
+                // data?.moreTimeRequest &&
+                // additionalTime?.map((step, _index) => {
+                //   const additionalTimeLabelProps = {}
+                //   const additionalTimeLabelRegex = /(Declined|Not|Disapproved)/
+                //   if (additionalTimeLabelRegex.test(step.label)) {                 
+                //     additionalTimeLabelProps.error = true
+                //   }
+                //   additionalTimeLabelProps.optional = (
+                //     <Typography
+                //       variant="caption"
+                //       color={
+                //         additionalTimeLabelProps.error ? 'error' : 'primary'
+                //       }
+                //     >
+                //       {step.date? `${step.date && formatDistanceToNow(new Date(step.date))} ago` : null}
+                //     </Typography>
+                //   )
+
+                //   return (
+                //     <LightTooltip
+                //       key={6}
+                //       title={step.remarks}
+                //       TransitionComponent={Zoom}
+                //     >
+                //       <Step>
+                //         <StepLabel {...additionalTimeLabelProps}>
+                //           {step.label}
+                //         </StepLabel>
+                //       </Step>
+                //     </LightTooltip>
+                //   )
+                // })                
               }
             </Stepper>
           ) ||
@@ -414,10 +454,20 @@ function ReturnFile({request}) {
         height={'fit-content'}
         sx={{ borderRadius: 3, alignContent: 'center', padding: 1 }}
       >
-        <Typography color="text.primary" sx={{ flex: 1 }}>
+        {
+          request?.moreTimeRequest ? 
+            <Typography m>
+              {`You requested for additional time on ${new Date(request?.additionalTime.date)}`}
+                <Typography fontWeight={300} fontSize={12} m>{`STATUS: ${request?.moreTimeRequest?.status}`}</Typography>
+            </Typography> 
+          : null
+        }
+        <Divider />
+        <Typography color="text.primary" sx={{ flex: 1 }} m>
           {/* eslint-disable-next-line react/no-unescaped-entities */}
-          If you want to return this file please click on the button below and wait for the receiving part acknowledge the receipt of the file
+          If you want to return this file please click on the button below.
         </Typography>
+        
         <Button
           onClick={returnFile}
           data-id={request._id}
@@ -426,6 +476,9 @@ function ReturnFile({request}) {
             backgroundColor: primaryColor,
             color: contrastText,
             alignContent: 'center',
+            display: 'flex',
+            boxShadow: 10,
+            margin: 'auto',
             ':hover': { backgroundColor: secondaryColor, color: contrastText },
           }}
         >Return File</Button>

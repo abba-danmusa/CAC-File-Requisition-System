@@ -4,7 +4,6 @@ import Theme from '../Theme';
 import { styled } from '@mui/material/styles';
 import CustomButton from "./CustomButton"
 import { primaryColor } from "../../utils/colors"
-import Alert from '../Alert'
 
 const StyledTextarea = styled(TextareaAutosize)(
   () => `
@@ -24,14 +23,10 @@ const StyledTextarea = styled(TextareaAutosize)(
 )
 
 // eslint-disable-next-line react/prop-types
-const CustomModal = ({submit, cancel, isSuccess, successMessage, isError, errorMessage}) => {
+const CustomModal = ({submit, cancel, title, inputValue, setInputValue, placeholder}) => {
   
-  const {openBackdrop, remarks, setRemarks, modalTitle} = useNotificationStore()
+  const {openBackdrop} = useNotificationStore()
   
-  const returnTitle = 'You are about to return this  file'
-  const moreTimeTitle = 'You are about to request for more time from the RMD'
-  const title = modalTitle == 'return' ? returnTitle : moreTimeTitle 
-
   return (
     <Slide direction="left" in={openBackdrop} mountOnEnter unmountOnExit>
       <Backdrop
@@ -49,8 +44,6 @@ const CustomModal = ({submit, cancel, isSuccess, successMessage, isError, errorM
             width: 500
           }}
         > 
-          {isSuccess && <Alert severity={'success'} message={successMessage}/>}
-          {isError && <Alert severity={'error'} message={errorMessage}/>}
           <Typography
             color='black'
             align='center'
@@ -59,21 +52,14 @@ const CustomModal = ({submit, cancel, isSuccess, successMessage, isError, errorM
           >
             {title}
           </Typography>
-          <Theme>
-            <StyledTextarea
-              variant="outlined"
-              placeholder={modalTitle == 'return' ? 'Remarks? (Optional)' : 'Reason (Required)'}
-              minRows={3}
-              margin="normal"
-              fullWidth
-              id="remarks"
-              label="Remarks"
-              name="remarks"
-              autoFocus
-              value={remarks}
-              onChange={(e) => setRemarks(e.target.value)}
-            />
-          </Theme>
+
+          {/* Conditional Text Area */}
+          <TextArea
+            placeholder={placeholder}
+            inputValue={inputValue}
+            setInputValue={setInputValue}
+          />
+          
           <Box
             align='center'
             mt={5}
@@ -95,6 +81,28 @@ const CustomModal = ({submit, cancel, isSuccess, successMessage, isError, errorM
         </Box>
       </Backdrop>
     </Slide>
+  )
+}
+
+// eslint-disable-next-line react/prop-types
+const TextArea = ({placeholder, inputValue, setInputValue}) => {
+  if (inputValue == undefined) return
+  return (
+    <Theme>
+      <StyledTextarea
+        variant="outlined"
+        placeholder={placeholder}
+        minRows={3}
+        margin="normal"
+        fullWidth
+        id="remarks"
+        label="Remarks"
+        name="remarks"
+        autoFocus
+        value={inputValue}
+        onChange={e => setInputValue(e.target.value)}
+      />
+    </Theme>
   )
 }
 

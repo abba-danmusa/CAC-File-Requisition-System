@@ -3,7 +3,7 @@ import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import Title from './Title';
-import { Skeleton, Typography, Button, Backdrop, CircularProgress } from '@mui/material';
+import { Skeleton, Typography, Button, Backdrop, CircularProgress, Divider } from '@mui/material';
 import Tooltip, {tooltipClasses } from '@mui/material/Tooltip';
 import { styled } from '@mui/material/styles';
 import { formatDistanceToNow } from 'date-fns'
@@ -58,7 +58,12 @@ export default function HorizontalLinearAlternativeLabelStepper() {
       remarks: data?.data?.request?.[0]?.fileReturn.remarks
     },
   ]
-
+  const additionalTime = [{
+    label: data?.data?.request?.[0]?.additionalTime.status,
+    date: data?.data?.request?.[0]?.additionalTime.date,
+    remarks: data?.data?.request?.[0]?.additionalTime.remarks
+  }]
+  
   return (
     <>
       <Title>Request Status</Title>
@@ -145,6 +150,41 @@ export default function HorizontalLinearAlternativeLabelStepper() {
                     </LightTooltip>
                   )
                 })
+              }
+              {/* Additional time step */}
+              {
+                data?.data.request?.moreTimeRequest &&
+                additionalTime?.map((step, _index) => {
+                  const additionalTimeLabelProps = {}
+                  const additionalTimeLabelRegex = /(Declined|Not|Disapproved)/
+                  if (additionalTimeLabelRegex.test(step.label)) {                 
+                    additionalTimeLabelProps.error = true
+                  }
+                  additionalTimeLabelProps.optional = (
+                    <Typography
+                      variant="caption"
+                      color={
+                        additionalTimeLabelProps.error ? 'error' : 'primary'
+                      }
+                    >
+                      {step.date? `${step.date && formatDistanceToNow(new Date(step.date))} ago` : null}
+                    </Typography>
+                  )
+
+                  return (
+                    <LightTooltip
+                      key={6}
+                      title={step.remarks}
+                      TransitionComponent={Zoom}
+                    >
+                      <Step>
+                        <StepLabel {...additionalTimeLabelProps}>
+                          {step.label}
+                        </StepLabel>
+                      </Step>
+                    </LightTooltip>
+                  )
+                })                
               }
             </Stepper>
           ) ||
@@ -252,9 +292,18 @@ function ReturnFile({request}) {
         height={'fit-content'}
         sx={{ borderRadius: 3, alignContent: 'center', padding: 1 }}
       >
-        <Typography color="text.primary" sx={{ flex: 1 }}>
+        {
+          request?.moreTimeRequest ? 
+            <Typography m>
+              {`You requested for additional time on ${new Date(request?.additionalTime.date)}`}
+                <Typography fontWeight={300} fontSize={12} m>{`STATUS: ${request?.moreTimeRequest?.status}`}</Typography>
+            </Typography> 
+          : null
+        }
+        <Divider/>
+        <Typography color="text.primary" sx={{ flex: 1 }} m>
           {/* eslint-disable-next-line react/no-unescaped-entities */}
-          If you want to return this file please click on the button below and wait for the receiving part acknowledge the receipt of the file
+          If you want to return this file please click on the button below.
         </Typography>
         <Button
           onClick={returnFile}
@@ -264,6 +313,9 @@ function ReturnFile({request}) {
             backgroundColor: primaryColor,
             color: contrastText,
             alignContent: 'center',
+            display: 'flex',
+            boxShadow: 10,
+            margin: 'auto',
             ':hover': { backgroundColor: secondaryColor, color: contrastText },
           }}
         >Return File</Button>
