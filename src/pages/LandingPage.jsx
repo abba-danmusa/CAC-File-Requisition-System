@@ -4,15 +4,15 @@ import SignUp from "../components/SignUp"
 
 
 function LandingPage() {
-  const [state, setState] = useState('Signin')
+  const [state, setState] = useState('SignIn')
 
   const activeTab = (dir) => {
     switch (dir) {
-      case 'Signup':
-        setState('Signup')
+      case 'SignUp':
+        setState('SignUp')
         break
-      case 'Signin':
-        setState('Signin')
+      case 'SignIn':
+        setState('SignIn')
         break
     }
   }
@@ -20,9 +20,9 @@ function LandingPage() {
   return (
     <>
       {
-        (state === 'Signin') && (<SignIn activeTab={activeTab} />) 
+        (state === 'SignIn') && (<SignIn activeTab={activeTab} />) 
         ||
-        (state === 'Signup') && (<SignUp activeTab={activeTab} />)
+        (state === 'SignUp') && (<SignUp activeTab={activeTab} />)
       }
     </>
   )
