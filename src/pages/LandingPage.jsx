@@ -1,6 +1,6 @@
 import { useState } from "react"
-import SignIn from '/src/components/SignIn'
-import SignUp from '/src/components/SignUp'
+import SignIn from '../components/SignIn.jsx'
+import SignUp from '../components/SignUp.jsx'
 
 
 function LandingPage() {
