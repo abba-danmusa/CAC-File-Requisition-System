@@ -3,7 +3,17 @@ import axios from "../utils/axios";
 import {socket} from '../utils/socket.io'
 import {toast} from 'react-toastify'
 
-const user = JSON.parse(localStorage.getItem('user'))
+// Safely read user from localStorage only in the browser. During build / Node
+// environment `localStorage` is not available and accessing it throws.
+let user = null
+if (typeof window !== 'undefined') {
+  try {
+    const raw = localStorage.getItem('user')
+    user = raw ? JSON.parse(raw) : null
+  } catch (e) {
+    user = null
+  }
+}
 
 export const useSendRequest = () => {
   const queryClient = useQueryClient()
@@ -27,7 +37,9 @@ export const useSendRequest = () => {
       return {previousRequest}
     },
     onSuccess: (data) => {
-      socket.emit('authorization notification', data.data.request, user)
+      if (socket && typeof socket.emit === 'function') {
+        socket.emit('authorization notification', data.data.request, user)
+      }
     },
     onError: (_error, _request, context) => {
       queryClient.setQueryData(['requests'], context.previousRequest)
@@ -103,11 +115,13 @@ export const useAuthorizeRequest = () => {
       return {previousRequest}
     },
     onSuccess: (data) => {
-      socket.emit('approval notification',
-        data.data.request.from,
-        data.data.request._id,
-        data.data.request.requestStatus.authorization
-      )
+      if (socket && typeof socket.emit === 'function') {
+        socket.emit('approval notification',
+          data.data.request.from,
+          data.data.request._id,
+          data.data.request.requestStatus.authorization
+        )
+      }
     },
     onError: (_error, _request, context) => {
       queryClient.setQueryData(['pending-authorization'], context.previousRequest)
@@ -171,11 +185,13 @@ export const useApproveRequest = () => {
       return {previousRequest}
     },
     onSuccess: (data) => {
-      socket.emit('release notification',
-        data.data.request.from,
-        data.data.request._id,
-        data.data.request.requestStatus.approval
-      )
+      if (socket && typeof socket.emit === 'function') {
+        socket.emit('release notification',
+          data.data.request.from,
+          data.data.request._id,
+          data.data.request.requestStatus.approval
+        )
+      }
     },
     onError: (_error, _request, context) => {
       queryClient.setQueryData(['pending-approvals'], context.previousRequest)
@@ -212,11 +228,13 @@ export const useApproveAdditionalTimeRequest = () => {
     },
     onSuccess: (data) => {
       toast.success(data?.data.message)
-      socket.emit('release notification',
-        data.data.request.from,
-        data.data.request._id,
-        data.data.request.requestStatus.approval
-      )
+      if (socket && typeof socket.emit === 'function') {
+        socket.emit('release notification',
+          data.data.request.from,
+          data.data.request._id,
+          data.data.request.requestStatus.approval
+        )
+      }
     },
     onError: (error, _request, context) => {
       toast.success(error.response.message)
@@ -290,11 +308,13 @@ export const useSendFile = () => {
       return { previousRequest }
     },
     onSuccess: data => {
-      socket.emit('file notification',
-        data.data.request.from,
-        data.data.request._id,
-        data.data.request.companyName
-      )
+      if (socket && typeof socket.emit === 'function') {
+        socket.emit('file notification',
+          data.data.request.from,
+          data.data.request._id,
+          data.data.request.companyName
+        )
+      }
     },
     onError: (_error, _request, context) => {
       queryClient.setQueryData(['pending-releases'], context.previousRequest)
@@ -342,7 +362,9 @@ export const useConfirmReceipt = () => {
       const to = data.data.request.requestStatus.fileRelease.releasedBy._id
       const from = data.data.request.from.name
       const companyName = data.data.request.companyName
-      socket.emit('receipt', to, from, companyName)
+      if (socket && typeof socket.emit === 'function') {
+        socket.emit('receipt', to, from, companyName)
+      }
     },
     onError: (_error, _request, context) => {
       queryClient.setQueryData(['latest-request'], context.previousLatestRequest)
@@ -400,7 +422,9 @@ export const useReturnFile = () => {
       const to = data?.data?.request?.requestStatus.fileRelease.releasedBy._id
       const from = data?.data?.request?.from.name
       const request = data?.data?.request
-      socket.emit('return notification', to, from, request)
+      if (socket && typeof socket.emit === 'function') {
+        socket.emit('return notification', to, from, request)
+      }
     },
     onError: (error, _request, context) => {
       toast.error(error?.response.message)
@@ -451,7 +475,9 @@ export const useAcknowledgeFileReturn = () => {
       const to = data.data.request.requestStatus.fileRelease.releasedBy._id
       const from = data.data.request.from
       const request = data.data.request
-      socket.emit('acknowledge', to, from, request)
+      if (socket && typeof socket.emit === 'function') {
+        socket.emit('acknowledge', to, from, request)
+      }
     },
     onError: (_error, _request, context) => {
       queryClient.setQueryData(['returned-files'], context.previousLatestRequest)
@@ -663,7 +689,9 @@ export const useRequestAdditionalTime = () => {
       const to = 'Approval Account'
       const from = data?.data?.request?.from.name
       const request = data?.data.request
-      socket.emit('more notification', to, from, request)
+      if (socket && typeof socket.emit === 'function') {
+        socket.emit('more notification', to, from, request)
+      }
     },
     onError: (error, _request, context) => {
       toast.success(error.response.data.message)

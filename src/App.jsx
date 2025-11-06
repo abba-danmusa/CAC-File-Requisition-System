@@ -7,23 +7,38 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import DashboardPage from './pages/DashboardPage';
 import {socket} from './utils/socket.io.jsx'
 
-const hasNotificationAPI = 'Notification' in window || 'webkitNotifications' in window
+// Guard any DOM / Notification / socket usage so it doesn't run during the
+// server/build phase where `window` and `Notification` are undefined.
+let notify = null
+if (typeof window !== 'undefined') {
+  const hasNotificationAPI = ('Notification' in window) || ('webkitNotifications' in window)
 
-if (hasNotificationAPI && Notification.permission !== 'granted') Notification.requestPermission()
-
-const notify = notification => {
-  if ('Notification' in window) {
-    if (Notification.permission == 'granted') {
-      new Notification(notification.subject, {
-        body: notification.body,
-        icon: '/src/assets/images/logos.png',
-        tag: notification.tag
-      })
+  if (hasNotificationAPI && typeof Notification !== 'undefined' && Notification.permission !== 'granted') {
+    try {
+      Notification.requestPermission()
+    } catch (e) {
+      // ignore in environments where Notification.requestPermission is not available
     }
   }
-}
 
-socket.on('notification', notify)
+  notify = (notification) => {
+    try {
+      if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+        new Notification(notification.subject, {
+          body: notification.body,
+          icon: '/src/assets/images/logos.png',
+          tag: notification.tag
+        })
+      }
+    } catch (e) {
+      // swallow errors from Notifications in environments that don't support them
+    }
+  }
+
+  if (socket && typeof socket.on === 'function') {
+    socket.on('notification', (n) => notify && notify(n))
+  }
+}
 
 function App() {
   const queryClient = new QueryClient()

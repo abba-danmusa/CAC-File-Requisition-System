@@ -23,7 +23,9 @@ function MainDashboard() {
   const user = JSON.parse(localStorage.getItem('user'))
   
   useEffect(() => {
-    socket.emit('join-room', user)
+    if (socket && typeof socket.emit === 'function') {
+      socket.emit('join-room', user)
+    }
   }, [user])
 
   return (

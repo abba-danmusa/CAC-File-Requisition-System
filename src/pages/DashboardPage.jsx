@@ -106,12 +106,16 @@ export default function Dashboard() {
   const handleLogout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
-    socket.emit('leave-room', user)
+    if (socket && typeof socket.emit === 'function') {
+      socket.emit('leave-room', user)
+    }
     navigate('/signin')
   }
 
   React.useEffect(() => {
-    socket.emit('join-room', user)
+    if (socket && typeof socket.emit === 'function') {
+      socket.emit('join-room', user)
+    }
   }, [user])
 
   return (

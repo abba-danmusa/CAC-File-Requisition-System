@@ -6,7 +6,14 @@ const instance = axios.create({
 
 instance.interceptors.request.use(
   async (config) => {
-    const token = localStorage.getItem('token')
+    let token = null
+    if (typeof window !== 'undefined') {
+      try {
+        token = localStorage.getItem('token')
+      } catch (e) {
+        token = null
+      }
+    }
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
