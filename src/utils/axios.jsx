@@ -1,7 +1,10 @@
 import axios from 'axios'
 
 const instance = axios.create({
-  baseURL: 'http://localhost:7777'
+  baseURL: 'https://cac-file-requisition-system-server.onrender.com/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
 })
 
 instance.interceptors.request.use(
