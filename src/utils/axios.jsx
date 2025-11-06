@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const instance = axios.create({
-  baseURL: 'https://cac-file-requisition-system-server.onrender.com/api',
+  baseURL: 'https://cac-file-requisition-system-server.onrender.com',
   headers: {
     'Content-Type': 'application/json',
   },
