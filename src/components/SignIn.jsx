@@ -149,7 +149,7 @@ export default function SignIn({activeTab}) {
               <Grid item>
                 <Button
                   variant="body2"
-                  onClick={() => activeTab('Signup')}
+                  onClick={() => activeTab('SignUp')}
                 >
                   {"Don't have an account? Sign Up"}
                 </Button>
